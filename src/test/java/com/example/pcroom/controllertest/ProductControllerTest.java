@@ -1,6 +1,7 @@
 package com.example.pcroom.controllertest;
 
 import com.example.pcroom.application.ProductService;
+import com.example.pcroom.domain.Product;
 import com.example.pcroom.presentation.ProductResponseDto;
 import com.example.pcroom.presentation.ProductSaveRequestDto;
 import com.example.pcroom.presentation.controller.ProductController;
@@ -17,6 +18,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -59,6 +64,43 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.price").value(3000))
                 .andExpect(jsonPath("$.quantity").value(20));
 
+
+    }
+
+    @Test
+    @DisplayName("전체 상품 검색")
+    public void findAllProducts() throws Exception {
+
+        // Given
+
+        ProductResponseDto productResponseDto1 = new ProductResponseDto();
+        productResponseDto1.setId(1L);
+        productResponseDto1.setName("milk");
+        productResponseDto1.setPrice(3000);
+        productResponseDto1.setQuantity(20);
+
+        ProductResponseDto productResponseDto2 = new ProductResponseDto();
+        productResponseDto2.setId(2L);
+        productResponseDto2.setName("choco");
+        productResponseDto2.setPrice(1000);
+        productResponseDto2.setQuantity(100);
+
+        List<ProductResponseDto> productResponseDtos = List.of(productResponseDto1, productResponseDto2);
+
+        // When
+
+        Mockito.when(productService.findAll()).thenReturn(productResponseDtos);
+
+        // Then
+
+        mockMvc.perform(get("/product"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("milk"))
+                .andExpect(jsonPath("$[0].price").value(3000))
+                .andExpect(jsonPath("$[0].quantity").value(20))
+                .andExpect(jsonPath("$[1].name").value("choco"))
+                .andExpect(jsonPath("$[1].price").value(1000))
+                .andExpect(jsonPath("$[1].quantity").value(100));
 
     }
 }

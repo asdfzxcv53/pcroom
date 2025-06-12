@@ -21,4 +21,8 @@ public class ProductRepository {
     public List<Product> findAll() {
         return em.createQuery("select p from Product p ", Product.class).getResultList();
     }
+
+    public Product findById(Long id) {
+        return em.find(Product.class, id);
+    }
 }

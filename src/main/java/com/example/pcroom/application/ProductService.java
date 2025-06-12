@@ -8,6 +8,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @Transactional
 public class ProductService {
@@ -27,5 +30,15 @@ public class ProductService {
         ProductResponseDto productResponseDto = ProductResponseDto.fromEntity(savedProduct);
 
         return productResponseDto;
+    }
+
+    public List<ProductResponseDto> findAll() {
+        List<Product> products = productRepository.findAll();
+        List<ProductResponseDto> productResponseDtos = products
+                .stream()
+                .map(product -> ProductResponseDto.fromEntity(product))
+                .toList();
+
+        return productResponseDtos;
     }
 }

@@ -5,11 +5,12 @@ import com.example.pcroom.presentation.ProductResponseDto;
 import com.example.pcroom.presentation.ProductSaveRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
+@RequestMapping(value = "/product")
 public class ProductController {
 
     private final ProductService productService;
@@ -19,10 +20,17 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @PostMapping(value = "/product")
+    @PostMapping
     public ResponseEntity<ProductResponseDto> createProduct(@RequestBody ProductSaveRequestDto productSaveRequestDto) {
         ProductResponseDto productResponseDto = productService.save(productSaveRequestDto);
 
         return ResponseEntity.ok(productResponseDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ProductResponseDto>> getAllProducts() {
+        List<ProductResponseDto> productResponseDtos = productService.findAll();
+
+        return ResponseEntity.ok(productResponseDtos);
     }
 }
