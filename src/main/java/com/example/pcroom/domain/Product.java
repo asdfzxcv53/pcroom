@@ -1,5 +1,6 @@
 package com.example.pcroom.domain;
 
+import com.example.pcroom.domain.exception.NotEnoughStockException;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,5 +35,12 @@ public class Product {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public void removeQuantity(int quantity) {
+        if (quantity > this.quantity) {
+            throw new NotEnoughStockException("not enough stock");
+        }
+        this.quantity -= quantity;
     }
 }

@@ -42,7 +42,7 @@ public class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("전체 상품 저장")
+    @DisplayName("전체 상품 검색")
     public void findAllProductsTest() throws Exception {
 
         // Given

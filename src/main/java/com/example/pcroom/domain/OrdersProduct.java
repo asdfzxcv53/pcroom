@@ -1,7 +1,9 @@
 package com.example.pcroom.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
+@Getter
 @Entity
 public class OrdersProduct {
 
@@ -22,4 +24,12 @@ public class OrdersProduct {
 
     @Column(nullable = false)
     private int orderPrice;
+
+    public OrdersProduct() {}
+    public OrdersProduct(Orders orders, Product product, int orderQuantity, int orderPrice) {
+        this.orders = orders;
+        this.product = product;
+        this.orderQuantity = orderQuantity;
+        this.orderPrice = orderPrice;
+    }
 }

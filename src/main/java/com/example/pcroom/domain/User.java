@@ -1,7 +1,9 @@
 package com.example.pcroom.domain;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -24,8 +26,22 @@ public class User {
     private String phoneNumber;
 
     @OneToMany(mappedBy = "user")
-    private List<SeatHistory> seatHistory;
+    private List<SeatHistory> seatHistory = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private List<Orders> orders;
+    private List<Orders> orders = new ArrayList<>();
+
+    public User() {}
+
+    @Builder
+    public User(String username, String password, String name, String phoneNumber) {
+        this.username = username;
+        this.password = password;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+    }
+
+    public void addOrders(Orders orders) {
+        this.orders.add(orders);
+    }
 }

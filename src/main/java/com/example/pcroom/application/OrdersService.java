@@ -1,0 +1,69 @@
+package com.example.pcroom.application;
+
+import com.example.pcroom.domain.Orders;
+import com.example.pcroom.domain.OrdersProduct;
+import com.example.pcroom.domain.Product;
+import com.example.pcroom.domain.User;
+import com.example.pcroom.infrastructure.OrdersRepository;
+import com.example.pcroom.infrastructure.ProductRepository;
+import com.example.pcroom.infrastructure.UserRepository;
+import com.example.pcroom.presentation.orders.OrdersProductRequestDto;
+import com.example.pcroom.presentation.orders.OrdersProductResponseDto;
+import com.example.pcroom.presentation.orders.OrdersRequestDto;
+import com.example.pcroom.presentation.orders.OrdersResponseDto;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+@Transactional
+public class OrdersService {
+
+    private final OrdersRepository ordersRepository;
+    private final UserRepository userRepository;
+    private final ProductRepository productRepository;
+
+    @Autowired
+    public OrdersService(OrdersRepository ordersRepository, UserRepository userRepository, ProductRepository productRepository) {
+        this.ordersRepository = ordersRepository;
+        this.userRepository = userRepository;
+        this.productRepository = productRepository;
+    }
+
+    public OrdersResponseDto createOrder(OrdersRequestDto ordersRequestDto) {
+
+        int totalPrice = 0;
+
+        Orders orders = new Orders();
+        orders.setOrderTime(LocalDateTime.now());
+        User user = userRepository.findById(ordersRequestDto.getUserId());
+        orders.setUser(user);
+
+        List<OrdersProductRequestDto> ordersProductRequestDtos = ordersRequestDto.getOrdersProductRequestDtos();
+
+        for(OrdersProductRequestDto ordersProductRequestDto : ordersProductRequestDtos) { // 주문목록을 순회하며 주문상품 저장
+            Product product = productRepository.findById(ordersProductRequestDto.getProductId());
+            product.removeQuantity(ordersProductRequestDto.getProductQuantity()); // 상품 재고에서 수량만큼 빼기 ( 수량 부족하면 exception )
+            totalPrice += product.getPrice() * ordersProductRequestDto.getProductQuantity();
+
+            OrdersProduct ordersProduct = new OrdersProduct(orders, product, ordersProductRequestDto.getProductQuantity(), product.getPrice());
+            orders.addOrdersProduct(ordersProduct); // cascade.ALL 로 orderProduct 는 order 과 같이 저장
+        }
+        orders.setTotalPrice(totalPrice);
+
+        Orders savedOrders = ordersRepository.save(orders);
+        OrdersResponseDto ordersResponseDto = new OrdersResponseDto();
+
+        List<OrdersProductResponseDto> ordersProductResponseDtos = orders.getOrdersProducts()
+                .stream()
+                .map(ordersProduct -> OrdersProductResponseDto.fromEntity(ordersProduct))
+                .toList();
+
+        ordersResponseDto.setOrdersProductResponseDtos(ordersProductResponseDtos);
+
+        return ordersResponseDto;
+    }
+}
