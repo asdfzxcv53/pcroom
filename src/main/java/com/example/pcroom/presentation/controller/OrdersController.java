@@ -6,13 +6,13 @@ import com.example.pcroom.presentation.orders.OrdersRequestDto;
 import com.example.pcroom.presentation.orders.OrdersResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.swing.*;
+import java.util.List;
 
 @RestController
-@RequestMapping(value = "/order")
+@RequestMapping(value = "/orders")
 public class OrdersController {
 
     private final OrdersService ordersService;
@@ -28,5 +28,13 @@ public class OrdersController {
         OrdersResponseDto ordersResponseDto = ordersService.createOrder(ordersRequestDto);
 
         return ResponseEntity.ok(ordersResponseDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<OrdersResponseDto>> getOrdersByUserId(@RequestParam("userId") Long userId){
+
+        List<OrdersResponseDto> ordersResponseDtos = ordersService.getOrdersByUserId(userId);
+
+        return ResponseEntity.ok(ordersResponseDtos);
     }
 }

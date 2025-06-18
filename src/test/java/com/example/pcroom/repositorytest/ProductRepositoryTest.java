@@ -2,6 +2,7 @@ package com.example.pcroom.repositorytest;
 
 import com.example.pcroom.domain.Product;
 import com.example.pcroom.infrastructure.ProductRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,17 +24,31 @@ public class ProductRepositoryTest {
     @Autowired
     private ProductRepository productRepository;
 
-    @Test
-    @DisplayName("상품 저장")
-    public void saveProductTest() throws Exception {
+    private Product product1;
+    private Product product2;
 
-        Product product = Product.builder()
+    @BeforeEach
+    void setUp() {
+
+        product1 = Product.builder()
                 .name("milk")
                 .price(3000)
                 .quantity(30)
                 .build();
 
-        Product savedProduct = productRepository.save(product);
+        product2 = Product.builder()
+                .name("choco")
+                .price(1000)
+                .quantity(10)
+                .build();
+
+    }
+
+    @Test
+    @DisplayName("상품 저장")
+    public void saveProductTest() throws Exception {
+
+        Product savedProduct = productRepository.save(product1);
 
         assertThat(savedProduct)
                 .isNotNull()
@@ -46,19 +61,6 @@ public class ProductRepositoryTest {
     public void findAllProductsTest() throws Exception {
 
         // Given
-
-        Product product1 = Product.builder()
-                .name("milk")
-                .price(3000)
-                .quantity(30)
-                .build();
-
-        Product product2 = Product.builder()
-                .name("choco")
-                .price(1000)
-                .quantity(10)
-                .build();
-
         productRepository.save(product1);
         productRepository.save(product2);
 
@@ -86,25 +88,13 @@ public class ProductRepositoryTest {
 
         // Given
 
-        Product product1 = Product.builder()
-                .name("milk")
-                .price(3000)
-                .quantity(30)
-                .build();
-
-        Product product2 = Product.builder()
-                .name("choco")
-                .price(1000)
-                .quantity(10)
-                .build();
-
-        productRepository.save(product1);
-        productRepository.save(product2);
+        Product savedProduct1 = productRepository.save(product1);
+        Product savedProduct2 = productRepository.save(product2);
 
         // When
 
-        Product id1 = productRepository.findById(4L);
-        Product id2 = productRepository.findById(5L);
+        Product id1 = productRepository.findById(savedProduct1.getId());
+        Product id2 = productRepository.findById(savedProduct2.getId());
 
         // Then
 

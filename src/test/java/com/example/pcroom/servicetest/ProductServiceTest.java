@@ -6,6 +6,7 @@ import com.example.pcroom.infrastructure.ProductRepository;
 import com.example.pcroom.presentation.ProductResponseDto;
 import com.example.pcroom.presentation.ProductSaveRequestDto;
 import org.assertj.core.groups.Tuple;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,25 +31,40 @@ public class ProductServiceTest {
     @InjectMocks
     private ProductService productService;
 
+    private Product product1;
+    private Product product2;
+
+    @BeforeEach
+    void setUp() {
+        product1 = Product.builder()
+                .name("milk")
+                .price(3000)
+                .quantity(30)
+                .build();
+
+        product1.setId(1L);
+
+        product2 = Product.builder()
+                .name("choco")
+                .price(1000)
+                .quantity(10)
+                .build();
+
+        product2.setId(2L);
+    }
+
     @Test
     @DisplayName("상품 저장")
     public void saveProductTest() throws Exception {
 
         // Given
 
-        Product product = Product.builder()
-                .name("milk")
-                .price(3000)
-                .quantity(30)
-                .build();
-        product.setId(1L);
-
         ProductSaveRequestDto productSaveRequestDto = new ProductSaveRequestDto();
         productSaveRequestDto.setName("milk");
         productSaveRequestDto.setPrice(3000);
         productSaveRequestDto.setQuantity(30);
 
-        when(productRepository.save(any(Product.class))).thenReturn(product);
+        when(productRepository.save(any(Product.class))).thenReturn(product1);
 
         // When
 
@@ -66,18 +82,6 @@ public class ProductServiceTest {
     public void findAllProductsTest() throws Exception {
 
         // Given
-
-        Product product1 = Product.builder()
-                .name("milk")
-                .price(3000)
-                .quantity(30)
-                .build();
-
-        Product product2 = Product.builder()
-                .name("choco")
-                .price(1000)
-                .quantity(10)
-                .build();
 
         List<Product> products = List.of(product1, product2);
 

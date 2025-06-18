@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -57,13 +58,34 @@ public class OrdersService {
         Orders savedOrders = ordersRepository.save(orders);
         OrdersResponseDto ordersResponseDto = new OrdersResponseDto();
 
-        List<OrdersProductResponseDto> ordersProductResponseDtos = orders.getOrdersProducts()
+        List<OrdersProductResponseDto> ordersProductResponseDtos = savedOrders.getOrdersProducts()
                 .stream()
                 .map(ordersProduct -> OrdersProductResponseDto.fromEntity(ordersProduct))
                 .toList();
 
         ordersResponseDto.setOrdersProductResponseDtos(ordersProductResponseDtos);
+        ordersResponseDto.setOrderId(savedOrders.getId());
 
         return ordersResponseDto;
+    }
+
+    public List<OrdersResponseDto> getOrdersByUserId(Long userId) {
+        List<Orders> orders = ordersRepository.findOrdersByUserId(userId);
+
+        List<OrdersResponseDto> ordersResponseDtos = new ArrayList<>();
+
+        for(Orders order : orders) {
+            OrdersResponseDto ordersResponseDto = new OrdersResponseDto();
+            ordersResponseDto.setOrderId(order.getId());
+            ordersResponseDto.setOrdersProductResponseDtos(
+                    order.getOrdersProducts().stream()
+                            .map(ordersProduct -> OrdersProductResponseDto.fromEntity(ordersProduct))
+                            .toList()
+            );
+
+            ordersResponseDtos.add(ordersResponseDto);
+        }
+
+        return ordersResponseDtos;
     }
 }

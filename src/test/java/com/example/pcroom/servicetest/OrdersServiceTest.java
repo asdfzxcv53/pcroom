@@ -2,6 +2,7 @@ package com.example.pcroom.servicetest;
 
 import com.example.pcroom.application.OrdersService;
 import com.example.pcroom.domain.Orders;
+import com.example.pcroom.domain.OrdersProduct;
 import com.example.pcroom.domain.Product;
 import com.example.pcroom.domain.User;
 import com.example.pcroom.domain.exception.NotEnoughStockException;
@@ -13,6 +14,7 @@ import com.example.pcroom.presentation.orders.OrdersProductResponseDto;
 import com.example.pcroom.presentation.orders.OrdersRequestDto;
 import com.example.pcroom.presentation.orders.OrdersResponseDto;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +46,35 @@ public class OrdersServiceTest {
     @InjectMocks
     private OrdersService ordersService;
 
+    private Product product1;
+    private Product product2;
+
+    private OrdersProductRequestDto oprd1;
+    private OrdersProductRequestDto oprd2;
+
+    @BeforeEach
+    void setUp() {
+        product1 = Product.builder()
+                .name("abc")
+                .price(1000)
+                .quantity(100)
+                .build();
+
+        product2 = Product.builder()
+                .name("def")
+                .price(2000)
+                .quantity(20)
+                .build();
+
+        oprd1 = new OrdersProductRequestDto();
+        oprd1.setProductId(1L);
+        oprd1.setProductQuantity(5);
+
+        oprd2 = new OrdersProductRequestDto();
+        oprd2.setProductId(2L);
+        oprd2.setProductQuantity(10);
+    }
+
     @Test
     @DisplayName("상품 주문")
     public void createOrders() throws Exception{
@@ -51,26 +82,6 @@ public class OrdersServiceTest {
         // Given
 
         User user = new User();
-
-        Product product1 = Product.builder()
-                .name("abc")
-                .price(1000)
-                .quantity(100)
-                .build();
-
-        Product product2 = Product.builder()
-                .name("def")
-                .price(2000)
-                .quantity(20)
-                .build();
-
-        OrdersProductRequestDto oprd1 = new OrdersProductRequestDto();
-        oprd1.setProductId(1L);
-        oprd1.setProductQuantity(5);
-
-        OrdersProductRequestDto oprd2 = new OrdersProductRequestDto();
-        oprd2.setProductId(2L);
-        oprd2.setProductQuantity(10);
 
         List<OrdersProductRequestDto> ordersProductRequestDtos = List.of(oprd1, oprd2);
 
@@ -85,7 +96,7 @@ public class OrdersServiceTest {
         when(userRepository.findById(1L)).thenReturn(user);
         when(productRepository.findById(1L)).thenReturn(product1);
         when(productRepository.findById(2L)).thenReturn(product2);
-        when(ordersRepository.save(any())).thenReturn(orders);
+        when(ordersRepository.save(any(Orders.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         OrdersResponseDto result = ordersService.createOrder(ordersRequestDto);
 
@@ -109,40 +120,17 @@ public class OrdersServiceTest {
 
         User user = new User();
 
-        Product product1 = Product.builder()
-                .name("abc")
-                .price(1000)
-                .quantity(100)
-                .build();
-
-        Product product2 = Product.builder()
-                .name("def")
-                .price(2000)
-                .quantity(20)
-                .build();
-
-        OrdersProductRequestDto oprd1 = new OrdersProductRequestDto();
-        oprd1.setProductId(1L);
-        oprd1.setProductQuantity(5);
-
-        OrdersProductRequestDto oprd2 = new OrdersProductRequestDto();
-        oprd2.setProductId(2L);
-        oprd2.setProductQuantity(100);
-
         List<OrdersProductRequestDto> ordersProductRequestDtos = List.of(oprd1, oprd2);
 
         OrdersRequestDto ordersRequestDto = new OrdersRequestDto();
         ordersRequestDto.setUserId(1L);
         ordersRequestDto.setOrdersProductRequestDtos(ordersProductRequestDtos);
 
-        Orders orders = new Orders();
-
         // WHen
 
         when(userRepository.findById(1L)).thenReturn(user);
         when(productRepository.findById(1L)).thenReturn(product1);
         when(productRepository.findById(2L)).thenReturn(product2);
-        //when(ordersRepository.save(any())).thenReturn(orders);
 
         // Then
 

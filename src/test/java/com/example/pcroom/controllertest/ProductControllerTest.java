@@ -6,6 +6,7 @@ import com.example.pcroom.presentation.ProductResponseDto;
 import com.example.pcroom.presentation.ProductSaveRequestDto;
 import com.example.pcroom.presentation.controller.ProductController;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,22 +40,40 @@ public class ProductControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Test
-    @DisplayName("상품 save API 테스트")
-    public void createProduct() throws Exception {
-        ProductSaveRequestDto productSaveRequestDto = new ProductSaveRequestDto();
+    private ProductSaveRequestDto productSaveRequestDto;
+    private ProductResponseDto productResponseDto1;
+    private ProductResponseDto productResponseDto2;
+
+    @BeforeEach
+    void setUp() {
+        productSaveRequestDto = new ProductSaveRequestDto();
         productSaveRequestDto.setName("milk");
         productSaveRequestDto.setPrice(3000);
         productSaveRequestDto.setQuantity(20);
 
-        ProductResponseDto productResponseDto = new ProductResponseDto();
-        productResponseDto.setId(1L);
-        productResponseDto.setName("milk");
-        productResponseDto.setPrice(3000);
-        productResponseDto.setQuantity(20);
+        productResponseDto1 = new ProductResponseDto();
+        productResponseDto1.setId(1L);
+        productResponseDto1.setName("milk");
+        productResponseDto1.setPrice(3000);
+        productResponseDto1.setQuantity(20);
+
+        productResponseDto2 = new ProductResponseDto();
+        productResponseDto2.setId(2L);
+        productResponseDto2.setName("choco");
+        productResponseDto2.setPrice(1000);
+        productResponseDto2.setQuantity(100);
+    }
+
+    @Test
+    @DisplayName("상품 save API 테스트")
+    public void createProduct() throws Exception {
+
+        // When
 
         Mockito.when(productService.save(Mockito.any(ProductSaveRequestDto.class)))
-                .thenReturn(productResponseDto);
+                .thenReturn(productResponseDto1);
+
+        // Then
 
         mockMvc.perform(post("/product")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -72,18 +91,6 @@ public class ProductControllerTest {
     public void findAllProducts() throws Exception {
 
         // Given
-
-        ProductResponseDto productResponseDto1 = new ProductResponseDto();
-        productResponseDto1.setId(1L);
-        productResponseDto1.setName("milk");
-        productResponseDto1.setPrice(3000);
-        productResponseDto1.setQuantity(20);
-
-        ProductResponseDto productResponseDto2 = new ProductResponseDto();
-        productResponseDto2.setId(2L);
-        productResponseDto2.setName("choco");
-        productResponseDto2.setPrice(1000);
-        productResponseDto2.setQuantity(100);
 
         List<ProductResponseDto> productResponseDtos = List.of(productResponseDto1, productResponseDto2);
 
