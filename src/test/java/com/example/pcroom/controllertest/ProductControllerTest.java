@@ -1,9 +1,8 @@
 package com.example.pcroom.controllertest;
 
 import com.example.pcroom.application.ProductService;
-import com.example.pcroom.domain.Product;
-import com.example.pcroom.presentation.ProductResponseDto;
-import com.example.pcroom.presentation.ProductSaveRequestDto;
+import com.example.pcroom.presentation.product.ProductResponseDto;
+import com.example.pcroom.presentation.product.ProductSaveRequestDto;
 import com.example.pcroom.presentation.controller.ProductController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,10 +15,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

@@ -1,4 +1,4 @@
-package com.example.pcroom.presentation;
+package com.example.pcroom.presentation.product;
 
 import com.example.pcroom.domain.Product;
 import lombok.Getter;

@@ -9,5 +9,13 @@ public class RemainTime {
     private Long id;
 
     @Column(nullable = false)
-    private Long remainTime;
+    private Long remainTime; // second 단위
+
+    @OneToOne
+    @JoinColumn(name = "USER_ID", nullable = false, unique = true)
+    private User user;
+
+    public void addRemainTime(Long time) {
+        this.remainTime += time;
+    }
 }

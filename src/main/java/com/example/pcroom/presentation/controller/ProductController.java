@@ -1,8 +1,8 @@
 package com.example.pcroom.presentation.controller;
 
 import com.example.pcroom.application.ProductService;
-import com.example.pcroom.presentation.ProductResponseDto;
-import com.example.pcroom.presentation.ProductSaveRequestDto;
+import com.example.pcroom.presentation.product.ProductResponseDto;
+import com.example.pcroom.presentation.product.ProductSaveRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

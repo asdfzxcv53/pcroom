@@ -2,6 +2,9 @@ package com.example.pcroom.domain;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 public class Seat {
 
@@ -15,4 +18,19 @@ public class Seat {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private SeatStatus seatStatus;
+
+    @OneToMany(mappedBy = "seat")
+    private List<SeatHistory> seatHistory = new ArrayList<SeatHistory>();
+
+    public void addSeatHistory(SeatHistory seatHistory) {
+        this.seatHistory.add(seatHistory);
+    }
+
+    public void setSeatNumber(int seatNumber) {
+        this.seatNumber = seatNumber;
+    }
+
+    public void setSeatStatus(SeatStatus seatStatus) {
+        this.seatStatus = seatStatus;
+    }
 }

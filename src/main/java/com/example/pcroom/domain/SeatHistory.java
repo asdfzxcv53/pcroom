@@ -10,7 +10,7 @@ public class SeatHistory {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "SEAT_ID")
     private Seat seat;
 
@@ -26,4 +26,6 @@ public class SeatHistory {
 
     @Column(nullable = false)
     private CurrentStatus currentStatus;
+
+
 }

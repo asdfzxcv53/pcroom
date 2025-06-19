@@ -2,13 +2,12 @@ package com.example.pcroom.application;
 
 import com.example.pcroom.domain.Product;
 import com.example.pcroom.infrastructure.ProductRepository;
-import com.example.pcroom.presentation.ProductResponseDto;
-import com.example.pcroom.presentation.ProductSaveRequestDto;
+import com.example.pcroom.presentation.product.ProductResponseDto;
+import com.example.pcroom.presentation.product.ProductSaveRequestDto;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service

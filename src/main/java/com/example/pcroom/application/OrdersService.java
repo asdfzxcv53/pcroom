@@ -78,7 +78,7 @@ public class OrdersService {
             OrdersResponseDto ordersResponseDto = new OrdersResponseDto();
             ordersResponseDto.setOrderId(order.getId());
             ordersResponseDto.setOrdersProductResponseDtos(
-                    order.getOrdersProducts().stream()
+                    order.getOrdersProducts().stream()  // findOrdersByUserId 에서 join fetch 를 이용하여 OrdersProducts 동시에 select -> 통해 성능 개선
                             .map(ordersProduct -> OrdersProductResponseDto.fromEntity(ordersProduct))
                             .toList()
             );
