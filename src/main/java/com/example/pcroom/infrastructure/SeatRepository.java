@@ -20,10 +20,18 @@ public class SeatRepository {
     }
 
     public List<Seat> findAll() {
-        return em.createQuery("select s from Seat s", Seat.class).getResultList();
+        return em.createQuery("select s from Seat s", Seat.class)
+                .getResultList();
+    }
+
+    public Seat findBySeatNumber(int seatNumber) {
+        return em.createQuery("select s from Seat s where s.seatNumber = :seatNumber", Seat.class)
+                .setParameter("seatNumber", seatNumber)
+                .getSingleResult();
     }
 
     public Long count() {
-        return em.createQuery("select count(s) from Seat s", Long.class).getSingleResult();
+        return em.createQuery("select count(s) from Seat s", Long.class)
+                .getSingleResult();
     }
 }

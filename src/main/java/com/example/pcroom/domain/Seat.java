@@ -1,11 +1,13 @@
 package com.example.pcroom.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
 public class Seat {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +21,7 @@ public class Seat {
     @Enumerated(EnumType.STRING)
     private SeatStatus seatStatus;
 
-    @OneToMany(mappedBy = "seat")
+    @OneToMany(mappedBy = "seat", cascade = CascadeType.ALL)
     private List<SeatHistory> seatHistory = new ArrayList<SeatHistory>();
 
     public void addSeatHistory(SeatHistory seatHistory) {
