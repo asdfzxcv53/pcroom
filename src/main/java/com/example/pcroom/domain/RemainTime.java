@@ -18,4 +18,10 @@ public class RemainTime {
     public void addRemainTime(Long time) {
         this.remainTime += time;
     }
+
+    public RemainTime() {}
+    public RemainTime(User user) {
+        this.user = user;
+        this.remainTime = 0L;
+    }
 }

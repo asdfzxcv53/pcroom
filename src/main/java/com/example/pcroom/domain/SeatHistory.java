@@ -27,5 +27,16 @@ public class SeatHistory {
     @Column(nullable = false)
     private CurrentStatus currentStatus;
 
+    public void setSeat(Seat seat) {
+        this.seat = seat;
+    }
 
+    public SeatHistory() {}
+    public SeatHistory(Seat seat, User user, LocalDateTime startTime, LocalDateTime endTime, CurrentStatus currentStatus) {
+        this.seat = seat;
+        this.user = user;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.currentStatus = currentStatus;
+    }
 }

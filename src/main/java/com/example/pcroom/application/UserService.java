@@ -1,7 +1,9 @@
 package com.example.pcroom.application;
 
+import com.example.pcroom.domain.RemainTime;
 import com.example.pcroom.domain.User;
 import com.example.pcroom.domain.exception.DuplicateAccountException;
+import com.example.pcroom.infrastructure.RemainTimeRepository;
 import com.example.pcroom.infrastructure.UserRepository;
 import com.example.pcroom.presentation.user.UserRequestDto;
 import com.example.pcroom.presentation.user.UserResponseDto;
@@ -16,13 +18,15 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final RemainTimeRepository remainTimeRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, RemainTimeRepository remainTimeRepository) {
         this.userRepository = userRepository;
+        this.remainTimeRepository = remainTimeRepository;
     }
 
-    public UserResponseDto addUser(UserRequestDto userRequestDto) {
+    public UserResponseDto addUser(UserRequestDto userRequestDto) {     //  회원가입
 
         checkDuplicatioAccount(userRequestDto.getUsername());
 
@@ -34,6 +38,10 @@ public class UserService {
                 .build();
 
         User savedUser = userRepository.save(user);
+
+        // 회원가입 순간에 remainTime 테이블에 그 회원의 남은시간 레코드 삽입
+        RemainTime remainTime = new RemainTime(savedUser);
+        remainTimeRepository.save(remainTime);
 
         UserResponseDto userResponseDto = new UserResponseDto();
 
