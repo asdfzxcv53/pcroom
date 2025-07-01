@@ -1,9 +1,10 @@
 package com.example.pcroom.integration;
 
+import com.example.pcroom.domain.RemainTime;
 import com.example.pcroom.domain.User;
+import com.example.pcroom.infrastructure.RemainTimeRepository;
 import com.example.pcroom.infrastructure.UserRepository;
-import com.example.pcroom.presentation.controller.LoginController;
-import com.example.pcroom.presentation.controller.UserController;
+import com.example.pcroom.presentation.LoginRequestDto;
 import com.example.pcroom.presentation.user.UserRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +32,12 @@ public class LoginInterationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private RemainTimeRepository remainTimeRepository;
+
     @Test
     @DisplayName("회원가입 중복 확인")
     public void joinTest() throws Exception {
@@ -48,5 +55,39 @@ public class LoginInterationTest {
                         .content(objectMapper.writeValueAsString(userRequestDto)))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("로그인 실패")
+    public void loginTest() throws Exception {
+
+        User user = new User("sskij", "1234", "seungwoo", "01082112923");
+        userRepository.save(user);
+
+        RemainTime remainTime = new RemainTime(user);
+        remainTime.addRemainTime(3600L);
+        remainTimeRepository.save(remainTime);
+
+        LoginRequestDto correctAccount = new LoginRequestDto("sskij", "1234", 1);
+        LoginRequestDto wrongAccount1 = new LoginRequestDto("wrong", "1234", 2);
+        LoginRequestDto wrongAccount2 = new LoginRequestDto("sskij", "wrong", 3);
+
+        mockMvc.perform(post("/login") // 로그인 성공
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(correctAccount)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("seungwoo"));
+
+        mockMvc.perform(post("/login") // username 틀린 경우
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(wrongAccount2)))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(post("/login") // password 틀린 경우
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(wrongAccount1)))
+                .andExpect(status().isBadRequest());
+
+
     }
 }

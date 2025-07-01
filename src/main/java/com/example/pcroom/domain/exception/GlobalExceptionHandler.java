@@ -15,4 +15,16 @@ public class GlobalExceptionHandler {
     public Map<String, String> handleDuplicateAccountException(DuplicateAccountException e) {
         return Map.of("error", e.getMessage());
     }
+
+    @ExceptionHandler(UsernameNotMatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleUsernameNotMatchException(UsernameNotMatchException e) {
+        return Map.of("error", e.getMessage());
+    }
+
+    @ExceptionHandler(PasswordNotMatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handlePasswordNotMatchException(PasswordNotMatchException e) {
+        return Map.of("error", e.getMessage());
+    }
 }

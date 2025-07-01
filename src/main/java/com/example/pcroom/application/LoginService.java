@@ -40,14 +40,15 @@ public class LoginService {
         Seat seat = seatRepository.findBySeatNumber(loginRequestDto.getSeatNumber());
 
         LocalDateTime endTime;
-        Long remainTime = remainTimeRepository.findRemainTime(loginUser.getId());
-        if (remainTime == null) {
+        Optional<RemainTime> remainTime = remainTimeRepository.findRemainTime(loginUser.getId());
+        if (remainTime.isEmpty()) {
             remainTimeRepository.save(new RemainTime(loginUser)); // 만약 로그인을 할때 관계되어있는 remainTime 객체가 없을시 save
             throw new NoRemainTimeException("시간을 충전해주세요."); // 남은시간이 없는경우 충전하라고 exception 보냄
-        } else if(remainTime == 0){
+        } else if(remainTime.get().getRemainTime() == 0){
             throw new NoRemainTimeException("시간을 충전해주세요."); // 남은시간이 없는경우 충전하라고 exception 보냄
         } else {
-            endTime = LocalDateTime.now().plusSeconds(remainTime); // 남은시간이 있는경우 현재시간+남은시간으로 endTime 계산
+            endTime = LocalDateTime.now().plusSeconds(remainTime.get().getRemainTime()); // 남은시간이 있는경우 현재시간+남은시간으로 endTime 계산
+            remainTime.get().login(endTime); // 로그인한 경우 remainTime 을 저장.
         }
 
         SeatHistory seatHistory = new SeatHistory(seat, loginUser, LocalDateTime.now(), endTime , CurrentStatus.USE);
@@ -71,10 +72,10 @@ public class LoginService {
 
         if(user.isPresent()) {
             if(!user.get().getPassword().equals(password)) {
-                throw(new PasswordNotMatchException());
+                throw(new PasswordNotMatchException("password not match"));
             }
         } else {
-            throw(new UsernameNotMatchException());
+            throw(new UsernameNotMatchException("username not match"));
         }
 
         return user;

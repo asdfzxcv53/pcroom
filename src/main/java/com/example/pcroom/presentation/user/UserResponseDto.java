@@ -20,4 +20,6 @@ public class UserResponseDto {
 
         return userResponseDto;
     }
+
+    public UserResponseDto() {}
 }

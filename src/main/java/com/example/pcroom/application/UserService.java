@@ -11,6 +11,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -46,6 +48,14 @@ public class UserService {
         UserResponseDto userResponseDto = new UserResponseDto();
 
         return userResponseDto.fromEntity(savedUser);
+    }
+
+    public Long addRemainTime(Long userId, Long addTime) {
+        Optional<RemainTime> remainTime = remainTimeRepository.findRemainTime(userId);
+
+        remainTime.get().addRemainTime(addTime);
+
+        return remainTime.get().getRemainTime();
     }
 
     public void checkDuplicatioAccount(String username) {

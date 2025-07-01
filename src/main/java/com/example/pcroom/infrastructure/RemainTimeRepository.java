@@ -7,6 +7,8 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public class RemainTimeRepository {
 
@@ -17,14 +19,14 @@ public class RemainTimeRepository {
         em.persist(remainTime);
     }
 
-    public Long findRemainTime(Long userId) {
+    public Optional<RemainTime> findRemainTime(Long userId) {
         try {
-            Long remainTime = em.createQuery("select r.remainTime from RemainTime r where r.user.id = :userId", Long.class)
+            RemainTime remainTime = em.createQuery("select r from RemainTime r where r.user.id = :userId", RemainTime.class)
                     .setParameter("userId", userId)
                     .getSingleResult();
-            return remainTime;
+            return Optional.of(remainTime);
         } catch(NoResultException e) {
-            return null;
+            return Optional.empty();
         }
     }
 }
