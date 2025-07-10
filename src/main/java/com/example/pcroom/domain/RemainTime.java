@@ -27,6 +27,10 @@ public class RemainTime {
         this.remainTime += time;
     }
 
+    public void addEndTime(Long time) {
+        this.endTime = this.endTime.plusSeconds(time);
+    }
+
     public RemainTime() {}
     public RemainTime(User user) {
         this.user = user;

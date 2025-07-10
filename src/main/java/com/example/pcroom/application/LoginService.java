@@ -34,7 +34,7 @@ public class LoginService {
 
     public LoginResponseDto login(LoginRequestDto loginRequestDto) {
 
-        Optional<User> user = checkValidation(loginRequestDto);
+        Optional<User> user = userRepository.findByUsername(loginRequestDto.getUsername());
         User loginUser = user.get();
 
         Seat seat = seatRepository.findBySeatNumber(loginRequestDto.getSeatNumber());
@@ -60,21 +60,4 @@ public class LoginService {
         return loginResponseDto;
     }
 
-    // 로그인 시 아이디와 페스워드 일치 체크
-    private Optional<User> checkValidation(LoginRequestDto loginRequestDto) {
-        String username = loginRequestDto.getUsername();
-        String password = loginRequestDto.getPassword();
-
-        Optional<User> user = userRepository.findByUsername(username);
-
-        if(user.isPresent()) {
-            if(!user.get().getPassword().equals(password)) {
-                throw(new PasswordNotMatchException("password not match"));
-            }
-        } else {
-            throw(new UsernameNotMatchException("username not match"));
-        }
-
-        return user;
-    }
 }

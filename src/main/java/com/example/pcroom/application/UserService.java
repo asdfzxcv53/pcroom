@@ -1,6 +1,7 @@
 package com.example.pcroom.application;
 
 import com.example.pcroom.domain.RemainTime;
+import com.example.pcroom.domain.Role;
 import com.example.pcroom.domain.User;
 import com.example.pcroom.domain.exception.DuplicateAccountException;
 import com.example.pcroom.infrastructure.RemainTimeRepository;
@@ -9,6 +10,7 @@ import com.example.pcroom.presentation.user.UserRequestDto;
 import com.example.pcroom.presentation.user.UserResponseDto;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,11 +23,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RemainTimeRepository remainTimeRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, RemainTimeRepository remainTimeRepository) {
+    public UserService(UserRepository userRepository, RemainTimeRepository remainTimeRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.remainTimeRepository = remainTimeRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserResponseDto addUser(UserRequestDto userRequestDto) {     //  회원가입
@@ -34,9 +38,10 @@ public class UserService {
 
         User user = User.builder()
                 .username(userRequestDto.getUsername())
-                .password(userRequestDto.getPassword())
+                .password(passwordEncoder.encode(userRequestDto.getPassword()))
                 .name(userRequestDto.getName())
                 .phoneNumber(userRequestDto.getPhoneNumber())
+                .role(Role.USER)
                 .build();
 
         User savedUser = userRepository.save(user);

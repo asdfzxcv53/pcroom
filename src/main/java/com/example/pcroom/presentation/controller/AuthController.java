@@ -35,7 +35,7 @@ public class AuthController {
         this.loginService = loginService;
     }
 
-    @PostMapping("/login")
+    @PostMapping(value = "/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDto loginRequestDto) {
         try {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequestDto.getUsername(), loginRequestDto.getPassword()));

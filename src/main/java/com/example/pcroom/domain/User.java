@@ -31,7 +31,7 @@ public class User implements UserDetails {
     private String phoneNumber;
 
     @Column(nullable = false)
-    private Role role = Role.USER;
+    private Role role;
 
     @OneToMany(mappedBy = "user")
     private List<SeatHistory> seatHistory = new ArrayList<>();
@@ -45,11 +45,12 @@ public class User implements UserDetails {
     public User() {}
 
     @Builder
-    public User(String username, String password, String name, String phoneNumber) {
+    public User(String username, String password, String name, String phoneNumber, Role role) {
         this.username = username;
         this.password = password;
         this.name = name;
         this.phoneNumber = phoneNumber;
+        this.role = role;
     }
 
     public void addOrders(Orders orders) {
