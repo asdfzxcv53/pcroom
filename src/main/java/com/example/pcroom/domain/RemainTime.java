@@ -31,6 +31,7 @@ public class RemainTime {
     public RemainTime(User user) {
         this.user = user;
         this.remainTime = 0L;
+        user.setRemainTime(this);
     }
 
     public void logout() {

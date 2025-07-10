@@ -41,10 +41,7 @@ public class LoginService {
 
         LocalDateTime endTime;
         Optional<RemainTime> remainTime = remainTimeRepository.findRemainTime(loginUser.getId());
-        if (remainTime.isEmpty()) {
-            remainTimeRepository.save(new RemainTime(loginUser)); // 만약 로그인을 할때 관계되어있는 remainTime 객체가 없을시 save
-            throw new NoRemainTimeException("시간을 충전해주세요."); // 남은시간이 없는경우 충전하라고 exception 보냄
-        } else if(remainTime.get().getRemainTime() == 0){
+        if(remainTime.get().getRemainTime() == 0){
             throw new NoRemainTimeException("시간을 충전해주세요."); // 남은시간이 없는경우 충전하라고 exception 보냄
         } else {
             endTime = LocalDateTime.now().plusSeconds(remainTime.get().getRemainTime()); // 남은시간이 있는경우 현재시간+남은시간으로 endTime 계산

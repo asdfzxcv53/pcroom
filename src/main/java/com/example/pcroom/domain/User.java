@@ -84,4 +84,8 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
     }
+
+    public void setRemainTime(RemainTime remainTime) {
+        this.remainTime = remainTime;
+    }
 }
