@@ -7,6 +7,8 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -28,5 +30,10 @@ public class RemainTimeRepository {
         } catch(NoResultException e) {
             return Optional.empty();
         }
+    }
+    public List<RemainTime> findRemainTimeAfterNow(LocalDateTime now){
+        return em.createQuery("select r from RemainTime r where r.endTime < :now", RemainTime.class)
+                .setParameter("now", now)
+                .getResultList();
     }
 }

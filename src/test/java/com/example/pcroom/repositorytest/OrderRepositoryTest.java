@@ -1,9 +1,6 @@
 package com.example.pcroom.repositorytest;
 
-import com.example.pcroom.domain.Orders;
-import com.example.pcroom.domain.OrdersProduct;
-import com.example.pcroom.domain.Product;
-import com.example.pcroom.domain.User;
+import com.example.pcroom.domain.*;
 import com.example.pcroom.infrastructure.OrdersRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +31,7 @@ public class OrderRepositoryTest {
 
         // Given
 
-        User user = new User("sskij", "1234", "seungwoo", "01082112923");
+        User user = new User("sskij", "1234", "seungwoo", "01082112923", Role.USER);
 
         Product product1 = new Product("abc", 1000, 100);
         Product product2 = new Product("def", 2000, 200);
