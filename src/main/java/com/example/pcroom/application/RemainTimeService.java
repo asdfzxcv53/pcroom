@@ -24,14 +24,11 @@ public class RemainTimeService {
 
         RemainTime remainTime = remainTimeRepository.findRemainTime(remainTimeRequestDto.getMemberId()).orElseThrow();
 
-        if(remainTime.getEndTime() == null) {
-            // null 이면 로그아웃 상태니까 remainTime 에 충전하는 시간을 더해준다.
+        //remainTime 에 충전하는 시간을 더해준다.
+        remainTime.addRemainTime(remainTimeRequestDto.getAddTime());
 
-            remainTime.addRemainTime(remainTimeRequestDto.getAddTime());
-
-        } else {
-            // null이 아니면 로그인 상태니까 endTime 에 충전하는 시간을 더해준다.
-
+        if(remainTime.getEndTime() != null) {
+            // null이 아니면 로그인 상태니까 endTime 에도 충전하는 시간을 더해준다.
             remainTime.addEndTime(remainTimeRequestDto.getAddTime());
         }
         RemainTimeResponseDto remainTimeResponseDto = new RemainTimeResponseDto(remainTimeRequestDto.getAddTime(), remainTime.getEndTime());

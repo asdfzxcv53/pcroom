@@ -48,9 +48,10 @@ public class LoginService {
             remainTime.get().login(endTime); // 로그인한 경우 remainTime 을 저장.
         }
 
-        SeatHistory seatHistory = new SeatHistory(seat, loginUser, LocalDateTime.now(), endTime , CurrentStatus.USE);
+        SeatHistory seatHistory = new SeatHistory(seat, loginUser, LocalDateTime.now(), null);
 
         seat.addSeatHistory(seatHistory);
+        seat.setSeatStatus(SeatStatus.USING);
         // transaction 이 끝나면 자동으로 영속성컨텍스트의 seat 이 변경감지를 통해 update 되고
         // Cascade.ALL 의 설정으로 seatHistory 역시 자동으로 데이터베이스에 저장이 된다.
 

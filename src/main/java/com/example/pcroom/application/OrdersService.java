@@ -43,9 +43,9 @@ public class OrdersService {
         User user = userRepository.findById(ordersRequestDto.getUserId());
         orders.setUser(user);
 
-        List<OrdersProductRequestDto> ordersProductRequestDtos = ordersRequestDto.getOrdersProductRequestDtos();
+        List<OrdersProductRequestDto> ordersProductRequestDtos = ordersRequestDto.getOrdersProductRequestDtos(); // 주문목록을 추출
 
-        for(OrdersProductRequestDto ordersProductRequestDto : ordersProductRequestDtos) { // 주문목록을 순회하며 주문상품 저장
+        for(OrdersProductRequestDto ordersProductRequestDto : ordersProductRequestDtos) {// 주문목록을 순회하며 주문상품 저장
             Product product = productRepository.findById(ordersProductRequestDto.getProductId());
             product.removeQuantity(ordersProductRequestDto.getProductQuantity()); // 상품 재고에서 수량만큼 빼기 ( 수량 부족하면 exception )
             totalPrice += product.getPrice() * ordersProductRequestDto.getProductQuantity();

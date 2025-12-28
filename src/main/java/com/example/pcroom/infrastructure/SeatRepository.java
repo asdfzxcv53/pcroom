@@ -30,6 +30,8 @@ public class SeatRepository {
                 .getSingleResult();
     }
 
+
+
     public Long count() {
         return em.createQuery("select count(s) from Seat s", Long.class)
                 .getSingleResult();

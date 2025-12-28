@@ -1,10 +1,12 @@
 package com.example.pcroom.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
 public class SeatHistory {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,22 +23,22 @@ public class SeatHistory {
     @Column(nullable = false)
     private LocalDateTime startTime;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDateTime endTime;
-
-    @Column(nullable = false)
-    private CurrentStatus currentStatus;
 
     public void setSeat(Seat seat) {
         this.seat = seat;
     }
 
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
     public SeatHistory() {}
-    public SeatHistory(Seat seat, User user, LocalDateTime startTime, LocalDateTime endTime, CurrentStatus currentStatus) {
+    public SeatHistory(Seat seat, User user, LocalDateTime startTime, LocalDateTime endTime) {
         this.seat = seat;
         this.user = user;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.currentStatus = currentStatus;
     }
 }

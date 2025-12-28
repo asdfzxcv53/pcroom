@@ -27,4 +27,22 @@ public class GlobalExceptionHandler {
     public Map<String, String> handlePasswordNotMatchException(PasswordNotMatchException e) {
         return Map.of("error", e.getMessage());
     }
+
+    @ExceptionHandler(NoRemainTimeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleNoRemainTimeException(NoRemainTimeException e) {
+        return Map.of("error", e.getMessage());
+    }
+
+    @ExceptionHandler(NotEnoughStockException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleNotEnoughStockException(NotEnoughStockException e) {
+        return Map.of("error", e.getMessage());
+    }
+
+    @ExceptionHandler(NoUserActiveSeatException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleNoUserActiveSeatException(NoUserActiveSeatException e) {
+        return Map.of("error", e.getMessage());
+    }
 }
