@@ -17,27 +17,15 @@ import java.util.Optional;
 @Transactional
 public class SchedulerService {
 
-    private final RemainTimeRepository remainTimeRepository;
-    private final SeatHistoryRepository seatHistoryRepository;
+    private final LogoutService logoutService;
 
     @Autowired
-    public SchedulerService(RemainTimeRepository remainTimeRepository, SeatHistoryRepository seatHistoryRepository) {
-        this.remainTimeRepository = remainTimeRepository;
-        this.seatHistoryRepository = seatHistoryRepository;
+    public SchedulerService(LogoutService logoutService) {
+        this.logoutService = logoutService;
     }
 
     @Scheduled(fixedRate = 6000)
     public void logout() {
-        List<RemainTime> remainTimes = remainTimeRepository.findRemainTimeAfterNow(LocalDateTime.now());
-        for (RemainTime remainTime : remainTimes) {
-            remainTime.logout(); // 사용한 시간을 계산하여 남은시간을 저장시킨다.
-            User user = remainTime.getUser();
-
-            SeatHistory seatHistory = seatHistoryRepository.findActiveByUser(user)
-                    .orElseThrow(() -> new NoUserActiveSeatException("이 유저는 사용중이지 않습니다."));
-
-            seatHistory.setEndTime(LocalDateTime.now()); // 로그기록에 종료시간을 기록한다.
-            seatHistory.getSeat().setSeatStatus(SeatStatus.EMPTY); // 좌석의 상태를 바꾼다 ( 사용중 -> 빈자리 )
-        }
+        logoutService.logoutEndTime();
     }
 }

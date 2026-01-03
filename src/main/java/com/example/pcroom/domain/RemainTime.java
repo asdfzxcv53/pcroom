@@ -40,11 +40,13 @@ public class RemainTime {
 
     public void logout() {
         if(this.endTime.isAfter(LocalDateTime.now())) { // 아직 endTime 이 되지 않았을경우.
-            this.remainTime = ChronoUnit.SECONDS.between(LocalDateTime.now(), endTime);
+            this.remainTime = ChronoUnit.SECONDS.between(LocalDateTime.now(), endTime); // 남은시간을 endTime - 현재시간 으로 계산한다.
         } else {
             this.remainTime = 0L; // endTime 이 지난경우 강제 로그아웃 되고, remainTime = 0
         }
-        this.endTime = null; // 로그아웃 하는경우 endTime = null;
+        this.endTime = null;
+        // 로그아웃 하는경우 endTime = null
+        // endTime 이 null 인지 아닌지로 로그인상태인지 확인 가능
     }
 
     public void login(LocalDateTime endTime) {

@@ -46,9 +46,10 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-        // 회원가입 순간에 remainTime 테이블에 그 회원의 남은시간 레코드 삽입
         RemainTime remainTime = new RemainTime(savedUser);
         remainTimeRepository.save(remainTime);
+        // 회원가입 순간에 RemainTime 테이블에 그 회원의 RemainTime 레코드 삽입
+        // 각 회원당 하나의 RemainTime 레코드를 가지고있다. 이 레코드안에서 남은시간과 종료시간을 계산.
 
         UserResponseDto userResponseDto = new UserResponseDto();
 

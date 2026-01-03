@@ -48,7 +48,7 @@ public class OrdersService {
         for(OrdersProductRequestDto ordersProductRequestDto : ordersProductRequestDtos) {// 주문목록을 순회하며 주문상품 저장
             Product product = productRepository.findById(ordersProductRequestDto.getProductId());
             product.removeQuantity(ordersProductRequestDto.getProductQuantity()); // 상품 재고에서 수량만큼 빼기 ( 수량 부족하면 exception )
-            totalPrice += product.getPrice() * ordersProductRequestDto.getProductQuantity();
+            totalPrice += product.getPrice() * ordersProductRequestDto.getProductQuantity(); // 총 가격 계산
 
             OrdersProduct ordersProduct = new OrdersProduct(orders, product, ordersProductRequestDto.getProductQuantity(), product.getPrice());
             orders.addOrdersProduct(ordersProduct); // cascade.ALL 로 orderProduct 는 order 과 같이 저장
@@ -62,6 +62,7 @@ public class OrdersService {
                 .stream()
                 .map(ordersProduct -> OrdersProductResponseDto.fromEntity(ordersProduct))
                 .toList();
+        // 나온 정보들을 다 합해서 응답Dto 생성
 
         ordersResponseDto.setOrdersProductResponseDtos(ordersProductResponseDtos);
         ordersResponseDto.setOrderId(savedOrders.getId());
@@ -78,7 +79,7 @@ public class OrdersService {
             OrdersResponseDto ordersResponseDto = new OrdersResponseDto();
             ordersResponseDto.setOrderId(order.getId());
             ordersResponseDto.setOrdersProductResponseDtos(
-                    order.getOrdersProducts().stream()  // findOrdersByUserId 에서 join fetch 를 이용하여 OrdersProducts 동시에 select -> 통해 성능 개선
+                    order.getOrdersProducts().stream()  // findOrdersByUserId 에서 join fetch 를 이용하여 OrdersProducts 동시에 select -> N + 1 문제 방지
                             .map(ordersProduct -> OrdersProductResponseDto.fromEntity(ordersProduct))
                             .toList()
             );

@@ -1,6 +1,8 @@
 package com.example.pcroom.controllertest;
 
 import com.example.pcroom.application.OrdersService;
+import com.example.pcroom.infrastructure.security.JwtAuthenticationFilter;
+import com.example.pcroom.infrastructure.security.JwtUtil;
 import com.example.pcroom.presentation.controller.OrdersController;
 import com.example.pcroom.presentation.orders.OrdersProductRequestDto;
 import com.example.pcroom.presentation.orders.OrdersProductResponseDto;
@@ -12,7 +14,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -29,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = OrdersController.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class OrdersControllerTest {
 
     @Autowired
@@ -36,6 +41,9 @@ public class OrdersControllerTest {
 
     @MockitoBean
     private OrdersService ordersService;
+
+    @MockitoBean
+    private JwtUtil jwtUtil;
 
     @Autowired
     private ObjectMapper objectMapper;

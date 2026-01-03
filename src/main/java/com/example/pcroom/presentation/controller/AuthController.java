@@ -1,6 +1,8 @@
 package com.example.pcroom.presentation.controller;
 
 import com.example.pcroom.application.LoginService;
+import com.example.pcroom.application.LogoutService;
+import com.example.pcroom.application.SchedulerService;
 import com.example.pcroom.application.UserService;
 import com.example.pcroom.infrastructure.security.JwtUtil;
 import com.example.pcroom.presentation.LoginRequestDto;
@@ -15,9 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class AuthController {
@@ -26,13 +26,15 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
     private final LoginService loginService;
+    private final LogoutService logoutService;
 
     @Autowired
-    public AuthController (AuthenticationManager authenticationManager, JwtUtil jwtUtil, UserDetailsService userDetailsService, LoginService loginService ) {
+    public AuthController (AuthenticationManager authenticationManager, JwtUtil jwtUtil, UserDetailsService userDetailsService, LoginService loginService, LogoutService logoutService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
         this.loginService = loginService;
+        this.logoutService = logoutService;
     }
 
     @PostMapping(value = "/login")
@@ -54,5 +56,12 @@ public class AuthController {
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
+    }
+
+    @PatchMapping(value = "/logout/{userId}")
+    public ResponseEntity<?> logout(@PathVariable Long userId) {
+        logoutService.logoutUser(userId);
+
+        return ResponseEntity.ok().build();
     }
 }
