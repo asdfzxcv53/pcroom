@@ -22,6 +22,13 @@ public class SeatHistoryRepository {
         return seatHistory;
     }
 
+    public List<SeatHistory> findAll() {
+        return em.createQuery("select s from SeatHistory s "+
+                    "join fetch s.user u " +
+                    "join fetch s.seat ss ", SeatHistory.class)
+                .getResultList();
+    }
+
     public List<SeatHistory> findByUserId(Long userId) {
         return em.createQuery("select sh from SeatHistory sh where sh.user.id = :userId", SeatHistory.class)
                 .setParameter("userId", userId)

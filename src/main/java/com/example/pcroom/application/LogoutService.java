@@ -36,6 +36,7 @@ public class LogoutService {
 
         logout(user, remainTime);
     }
+
     public void logoutEndTime() { // 종료시간이 지난 좌석들 로그아웃
         List<RemainTime> remainTimes = remainTimeRepository.findRemainTimeAfterNow(LocalDateTime.now()); // 종료시간이 지난 레코드들을 찾는다
 
