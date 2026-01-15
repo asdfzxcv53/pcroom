@@ -10,6 +10,9 @@ import com.example.pcroom.presentation.user.UserRequestDto;
 import com.example.pcroom.presentation.user.UserResponseDto;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +22,7 @@ import java.util.Optional;
 
 @Service
 @Transactional
-public class UserService {
+public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final RemainTimeRepository remainTimeRepository;
@@ -69,5 +72,10 @@ public class UserService {
                 .ifPresent(user -> {
                     throw new DuplicateAccountException("이미 존재하는 아이디 입니다.");
                 });
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
     }
 }

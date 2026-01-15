@@ -36,4 +36,15 @@ public class RemainTimeRepository {
                 .setParameter("now", now)
                 .getResultList();
     }
+
+    public Optional<LocalDateTime> findEndTimeByUserId(Long userId) {
+        try {
+            LocalDateTime endTime = em.createQuery("select r.endTime from RemainTime r where r.user.id = :userId", LocalDateTime.class)
+                    .setParameter("userId", userId)
+                    .getSingleResult();
+            return Optional.of(endTime);
+        } catch (NoResultException e){
+            return Optional.empty();
+        }
+    }
 }
