@@ -22,7 +22,7 @@ import java.util.Optional;
 
 @Service
 @Transactional
-public class UserService implements UserDetailsService {
+public class UserService {
 
     private final UserRepository userRepository;
     private final RemainTimeRepository remainTimeRepository;
@@ -74,8 +74,4 @@ public class UserService implements UserDetailsService {
                 });
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
-    }
 }

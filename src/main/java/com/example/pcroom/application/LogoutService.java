@@ -8,6 +8,7 @@ import com.example.pcroom.infrastructure.RefreshTokenRepository;
 import com.example.pcroom.infrastructure.RemainTimeRepository;
 import com.example.pcroom.infrastructure.SeatHistoryRepository;
 import com.example.pcroom.infrastructure.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Transactional
 public class LogoutService {
 
     private final RemainTimeRepository remainTimeRepository;
