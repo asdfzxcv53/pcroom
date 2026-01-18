@@ -1,5 +1,6 @@
 package com.example.pcroom.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -14,12 +15,11 @@ public class RefreshToken {
     @Column(name = "REFRESHTOKEN_ID")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_ID", nullable = false)
-    private User user;
+    @Column
+    private Long userId;
 
     @Column(nullable = false, length = 255)
-    private String tokenHash;
+    private String hashedToken;
 
     @Column(nullable = false)
     private LocalDateTime expiresAt;
@@ -31,18 +31,19 @@ public class RefreshToken {
     private LocalDateTime createdAt;
 
     protected RefreshToken() {}
-    protected RefreshToken(User user, String tokenHash, LocalDateTime expiresAt) {
-        this.user = user;
-        this.tokenHash = tokenHash;
-        this.expiresAt = expiresAt;
+    protected RefreshToken(Long userId, String hashedToken, Duration ttl) {
+        this.userId = userId;
+        this.hashedToken = hashedToken;
+        this.expiresAt = LocalDateTime.now().plus(ttl);
         this.revoked = false;
         this.createdAt = LocalDateTime.now();
     }
 
-    public static RefreshToken create(User user, String tokenHash, Duration ttl) {
-        return new RefreshToken(user, tokenHash, LocalDateTime.now().plus(ttl));
+    public static RefreshToken create(Long userId, String hashedToken, Duration ttl) {
+        return new RefreshToken(userId, hashedToken, ttl);
     }
 
+    @JsonIgnore
     public boolean isExpired() {
         return expiresAt.isBefore(LocalDateTime.now());
     }
@@ -50,4 +51,10 @@ public class RefreshToken {
     public void revoke() {
         this.revoked = true;
     }
+
+    @JsonIgnore
+    public boolean isRevoked() {
+        return revoked;
+    }
+
 }

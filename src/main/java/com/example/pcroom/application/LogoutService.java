@@ -4,7 +4,7 @@ import com.example.pcroom.domain.*;
 import com.example.pcroom.domain.exception.NoRemainTimeException;
 import com.example.pcroom.domain.exception.NoUserActiveSeatException;
 import com.example.pcroom.domain.exception.RefreshTokenNotFoundException;
-import com.example.pcroom.infrastructure.RefreshTokenRepository;
+import com.example.pcroom.infrastructure.DBRefreshTokenRepository;
 import com.example.pcroom.infrastructure.RemainTimeRepository;
 import com.example.pcroom.infrastructure.SeatHistoryRepository;
 import com.example.pcroom.infrastructure.UserRepository;
@@ -22,10 +22,10 @@ public class LogoutService {
     private final RemainTimeRepository remainTimeRepository;
     private final UserRepository userRepository;
     private final SeatHistoryRepository seatHistoryRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final DBRefreshTokenRepository refreshTokenRepository;
 
     @Autowired
-    public LogoutService(RemainTimeRepository remainTimeRepository, UserRepository userRepository, SeatHistoryRepository seatHistoryRepository, RefreshTokenRepository refreshTokenRepository) {
+    public LogoutService(RemainTimeRepository remainTimeRepository, UserRepository userRepository, SeatHistoryRepository seatHistoryRepository, DBRefreshTokenRepository refreshTokenRepository) {
         this.remainTimeRepository = remainTimeRepository;
         this.userRepository = userRepository;
         this.seatHistoryRepository = seatHistoryRepository;
@@ -61,7 +61,7 @@ public class LogoutService {
     }
 
     public void revokeToken(User user, String refreshToken) {
-        RefreshToken savedToken = refreshTokenRepository.findByUserAndHashedToken(user, refreshToken)
+        RefreshToken savedToken = refreshTokenRepository.findByUserIdAndHashedToken(user.getId(), refreshToken)
                 .orElseThrow(() -> new RefreshTokenNotFoundException("refresh token not found"));
 
         savedToken.revoke();

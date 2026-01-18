@@ -32,11 +32,11 @@ public class AuthService {
     private final SeatRepository seatRepository;
     private final RemainTimeRepository remainTimeRepository;
     private final AuthenticationManager authenticationManager;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final DBRefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
 
     @Autowired
-    public AuthService(UserRepository userRepository, SeatRepository seatRepository, RemainTimeRepository remainTimeRepository, AuthenticationManager authenticationManager, RefreshTokenRepository refreshTokenRepository , JwtUtil jwtUtil) {
+    public AuthService(UserRepository userRepository, SeatRepository seatRepository, RemainTimeRepository remainTimeRepository, AuthenticationManager authenticationManager, DBRefreshTokenRepository refreshTokenRepository , JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.seatRepository = seatRepository;
         this.remainTimeRepository = remainTimeRepository;
@@ -64,11 +64,11 @@ public class AuthService {
         User loginUser = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("username not found"));
 
-        refreshTokenRepository.deleteByUser(loginUser);
+        refreshTokenRepository.deleteByUserId(loginUser.getId());
         // 존재하던 refreshToken 삭제 해주거나, 아니면 db에 로그기록으로 남기거나 선택
 
-        RefreshToken dbRefreshToken = RefreshToken.create(loginUser, hash(refreshToken), Duration.ofDays(14));
-        refreshTokenRepository.save(dbRefreshToken);
+        RefreshToken newRefreshToken = RefreshToken.create(loginUser.getId(), hash(refreshToken), Duration.ofDays(14));
+        refreshTokenRepository.save(newRefreshToken);
         // refreshtoken db 에 저장
 
         Seat seat = seatRepository.findBySeatNumber(loginRequestDto.getSeatNumber());
@@ -110,7 +110,7 @@ public class AuthService {
 
         String hashedToken = hash(refreshToken);
 
-        RefreshToken savedRefreshToken = refreshTokenRepository.findByUserAndHashedToken(user, hashedToken)
+        RefreshToken savedRefreshToken = refreshTokenRepository.findByUserIdAndHashedToken(user.getId(), hashedToken)
                 .orElseThrow(() -> new RefreshTokenNotFoundException("refresh token not found"));
 
         if(savedRefreshToken.isRevoked()){
