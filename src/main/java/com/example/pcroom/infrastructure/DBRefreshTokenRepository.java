@@ -31,11 +31,10 @@ public class DBRefreshTokenRepository implements RefreshTokenRepository {
     }
 
     @Override
-    public Optional<RefreshToken> findByUserIdAndHashedToken(Long userId, String hashedToken) {
+    public Optional<RefreshToken> findByUserId(Long userId) {
         try {
-            RefreshToken refreshToken = em.createQuery("select rt from RefreshToken rt where rt.userId = :userId and rt.hashedToken = :hashedToken", RefreshToken.class)
+            RefreshToken refreshToken = em.createQuery("select rt from RefreshToken rt where rt.userId = :userId", RefreshToken.class)
                     .setParameter("userId", userId)
-                    .setParameter("hashedToken", hashedToken)
                     .getSingleResult();
             return Optional.of(refreshToken);
         } catch (NoResultException e) {

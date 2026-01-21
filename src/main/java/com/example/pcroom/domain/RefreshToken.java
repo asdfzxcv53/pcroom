@@ -7,13 +7,14 @@ import lombok.Getter;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-@Entity
+//@Entity
 @Getter
 public class RefreshToken {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "REFRESHTOKEN_ID")
-    private Long id;
+//    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @Column(name = "REFRESHTOKEN_ID")
+//    @JsonIgnore
+//    private Long id;
 
     @Column
     private Long userId;
@@ -30,7 +31,7 @@ public class RefreshToken {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    protected RefreshToken() {}
+    public RefreshToken() {}
     protected RefreshToken(Long userId, String hashedToken, Duration ttl) {
         this.userId = userId;
         this.hashedToken = hashedToken;

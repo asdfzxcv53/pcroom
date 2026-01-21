@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Ref;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -26,13 +27,13 @@ public class RedisRefreshTokenRepository implements RefreshTokenRepository {
         this.redisTemplate = redisTemplate;
     }
 
-    private String generateKey(Long userId, String hashedToken) {
-        return KEY_PREFIX + userId + ":" + hashedToken;
+    private String generateKey(Long userId) {
+        return KEY_PREFIX + userId;
     }
 
     @Override
     public RefreshToken save(RefreshToken refreshToken) {
-        String key = generateKey(refreshToken.getUserId(), refreshToken.getHashedToken());
+        String key = generateKey(refreshToken.getUserId());
 
         long ttlSeconds = Duration.between(LocalDateTime.now(), refreshToken.getExpiresAt()).toSeconds();
 
@@ -43,20 +44,16 @@ public class RedisRefreshTokenRepository implements RefreshTokenRepository {
 
     @Override
     public void deleteByUserId(Long userId) {
-        String pattern = KEY_PREFIX + userId + ":*";
-        Set<String> keys = redisTemplate.keys(pattern);
-        if(keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
-        }
+        String key = generateKey(userId);
+        redisTemplate.delete(key);
     }
 
     @Override
-    public Optional<RefreshToken> findByUserIdAndHashedToken(Long userId, String hashedToken) {
-        String key = generateKey(userId, hashedToken);
-
-        RefreshToken refreshToken = (RefreshToken) redisTemplate.opsForValue().get(key);
-        if(refreshToken != null) {
-            return Optional.of(refreshToken);
+    public Optional<RefreshToken> findByUserId(Long userId) {
+        String key = generateKey(userId);
+        Object value = redisTemplate.opsForValue().get(key);
+        if (value != null) {
+            return Optional.of((RefreshToken) value);
         }
         return Optional.empty();
     }

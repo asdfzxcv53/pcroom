@@ -53,8 +53,11 @@ public class DBRefreshTokenRepositoryTest {
 
         // then
 
+        long start = System.currentTimeMillis();;
         RefreshToken found =
-                refreshTokenRepository.findByUserIdAndHashedToken(user.getId(), refreshToken.getHashedToken()).orElseThrow();
+                refreshTokenRepository.findByUserId(user.getId()).orElseThrow();
+        long end = System.currentTimeMillis();
+        System.out.println(end - start);
 
         assertThat(found.getHashedToken()).isEqualTo("tokenhash");
         assertThat(found.isExpired()).isFalse();
@@ -75,7 +78,7 @@ public class DBRefreshTokenRepositoryTest {
         entityManager.flush();
         entityManager.clear();
 
-        assertThat(refreshTokenRepository.findByUserIdAndHashedToken(user.getId(), refreshToken.getHashedToken())).isNotEmpty();
+        assertThat(refreshTokenRepository.findByUserId(user.getId())).isNotEmpty();
 
         //When
 
@@ -84,6 +87,6 @@ public class DBRefreshTokenRepositoryTest {
 
         //Then
 
-        assertThat(refreshTokenRepository.findByUserIdAndHashedToken(user.getId(), refreshToken.getHashedToken())).isEmpty();
+        assertThat(refreshTokenRepository.findByUserId(user.getId())).isEmpty();
     }
 }

@@ -4,10 +4,7 @@ import com.example.pcroom.domain.*;
 import com.example.pcroom.domain.exception.NoRemainTimeException;
 import com.example.pcroom.domain.exception.NoUserActiveSeatException;
 import com.example.pcroom.domain.exception.RefreshTokenNotFoundException;
-import com.example.pcroom.infrastructure.DBRefreshTokenRepository;
-import com.example.pcroom.infrastructure.RemainTimeRepository;
-import com.example.pcroom.infrastructure.SeatHistoryRepository;
-import com.example.pcroom.infrastructure.UserRepository;
+import com.example.pcroom.infrastructure.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,10 +19,10 @@ public class LogoutService {
     private final RemainTimeRepository remainTimeRepository;
     private final UserRepository userRepository;
     private final SeatHistoryRepository seatHistoryRepository;
-    private final DBRefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Autowired
-    public LogoutService(RemainTimeRepository remainTimeRepository, UserRepository userRepository, SeatHistoryRepository seatHistoryRepository, DBRefreshTokenRepository refreshTokenRepository) {
+    public LogoutService(RemainTimeRepository remainTimeRepository, UserRepository userRepository, SeatHistoryRepository seatHistoryRepository, RefreshTokenRepository refreshTokenRepository) {
         this.remainTimeRepository = remainTimeRepository;
         this.userRepository = userRepository;
         this.seatHistoryRepository = seatHistoryRepository;
@@ -61,7 +58,7 @@ public class LogoutService {
     }
 
     public void revokeToken(User user, String refreshToken) {
-        RefreshToken savedToken = refreshTokenRepository.findByUserIdAndHashedToken(user.getId(), refreshToken)
+        RefreshToken savedToken = refreshTokenRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RefreshTokenNotFoundException("refresh token not found"));
 
         savedToken.revoke();

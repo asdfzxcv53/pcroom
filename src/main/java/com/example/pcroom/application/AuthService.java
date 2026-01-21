@@ -32,11 +32,11 @@ public class AuthService {
     private final SeatRepository seatRepository;
     private final RemainTimeRepository remainTimeRepository;
     private final AuthenticationManager authenticationManager;
-    private final DBRefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
 
     @Autowired
-    public AuthService(UserRepository userRepository, SeatRepository seatRepository, RemainTimeRepository remainTimeRepository, AuthenticationManager authenticationManager, DBRefreshTokenRepository refreshTokenRepository , JwtUtil jwtUtil) {
+    public AuthService(UserRepository userRepository, SeatRepository seatRepository, RemainTimeRepository remainTimeRepository, AuthenticationManager authenticationManager, RefreshTokenRepository refreshTokenRepository , JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.seatRepository = seatRepository;
         this.remainTimeRepository = remainTimeRepository;
@@ -54,7 +54,7 @@ public class AuthService {
                 )
         ); // id and password 검증. 잘못되면 exception 던져진다.
 
-        UserDetails userDetails = (UserDetails) authentication.getDetails();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         // 가져온 인증객체에서 유저정보 가져오기.
 
         String accessToken = jwtUtil.generateAccessToken(userDetails);
@@ -108,9 +108,7 @@ public class AuthService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("username not found"));
 
-        String hashedToken = hash(refreshToken);
-
-        RefreshToken savedRefreshToken = refreshTokenRepository.findByUserIdAndHashedToken(user.getId(), hashedToken)
+        RefreshToken savedRefreshToken = refreshTokenRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RefreshTokenNotFoundException("refresh token not found"));
 
         if(savedRefreshToken.isRevoked()){

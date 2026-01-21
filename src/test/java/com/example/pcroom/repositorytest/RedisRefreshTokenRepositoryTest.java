@@ -38,7 +38,7 @@ public class RedisRefreshTokenRepositoryTest {
         User user = new User("abc123", "1234", "승우", "01012341234", Role.USER);
 
         RefreshToken refreshToken = RefreshToken.create(user.getId(), "tokenhash", Duration.ofDays(14));
-        String key = prefix + user.getId() + ":tokenhash";
+        String key = prefix + user.getId();
 
         //When
 
@@ -46,7 +46,7 @@ public class RedisRefreshTokenRepositoryTest {
 
         // then
 
-        RefreshToken found = redisRefreshTokenRepository.findByUserIdAndHashedToken(user.getId(), "tokenhash")
+        RefreshToken found = redisRefreshTokenRepository.findByUserId(user.getId())
                 .orElse(null);
 
         assertThat(found.getHashedToken()).isEqualTo(refreshToken.getHashedToken());

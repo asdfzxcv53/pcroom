@@ -16,34 +16,31 @@ import java.util.stream.Collectors;
 @Component
 public class JwtUtil {
 
-    private final String SECRET_KEY = "my-secret-key";
+    private final String SECRET_KEY = "mysecretkeymymysecretkeymymysecretkeymymysecretkeymymysecretkeymymysecretkeymy";
 
     private final long accessTokenExpirationMs = 1000L * 60 * 30;
     private final long refreshTokenExpirationMs = 1000L * 60 * 60 * 24 * 14;
 
     public String generateAccessToken(UserDetails userDetails) {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        Key key = Keys.hmacShaKeyFor(keyBytes);
 
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .claim("type", "access")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpirationMs))
-                .signWith(key, SignatureAlgorithm.HS512)
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        Key key = Keys.hmacShaKeyFor(keyBytes);
+
 
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .claim("type", "refresh")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpirationMs))
-                .signWith(key, SignatureAlgorithm.HS512)
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }
 

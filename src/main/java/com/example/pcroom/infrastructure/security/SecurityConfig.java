@@ -1,11 +1,13 @@
 package com.example.pcroom.infrastructure.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,15 +25,26 @@ public class SecurityConfig {
     }
 
     @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web -> web.ignoring()
+                .requestMatchers("/refreshToken"));
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user", "/login", "/remainTime", "/orders", "/seathistory").permitAll()
+                .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/user", "/login", "/remainTime").permitAll()
+                        .requestMatchers("/seathistory", "/orders").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        }))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin(form -> form.disable());
 

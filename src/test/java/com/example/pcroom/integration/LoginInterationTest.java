@@ -82,7 +82,7 @@ public class LoginInterationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(correctAccount)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("seungwoo"))
+                .andExpect(jsonPath("$..name").value("seungwoo"))
                 .andDo(print())
                 .andReturn();
 

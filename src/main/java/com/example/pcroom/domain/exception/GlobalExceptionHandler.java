@@ -45,4 +45,10 @@ public class GlobalExceptionHandler {
     public Map<String, String> handleNoUserActiveSeatException(NoUserActiveSeatException e) {
         return Map.of("error", e.getMessage());
     }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public Map<String, String> handleUsernameNotFoundException(UsernameNotFoundException e) {
+        return Map.of("error", e.getMessage());
+    }
 }

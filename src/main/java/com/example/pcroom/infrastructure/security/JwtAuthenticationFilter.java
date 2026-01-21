@@ -51,7 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 LocalDateTime endTime = remainTimeRepository.findEndTimeByUserId(userId)
                         .orElse(null);
 
-                if(endTime == null && endTime.isBefore(LocalDateTime.now())) {
+                if(endTime == null || endTime.isBefore(LocalDateTime.now())) {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     return;
                 } // 이부분은 피시방로직에서 endtime 이 null 이거나 지금보다 전이면 로그아웃 상태라는 것으로 인지되어 바로 상태를 바꿔 return 해준다.
@@ -65,4 +65,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return request.getRequestURI().startsWith("/refreshToken");
+    }
+
 }
