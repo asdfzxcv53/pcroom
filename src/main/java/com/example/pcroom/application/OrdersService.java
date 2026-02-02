@@ -40,7 +40,8 @@ public class OrdersService {
 
         Orders orders = new Orders();
         orders.setOrderTime(LocalDateTime.now());
-        User user = userRepository.findById(ordersRequestDto.getUserId());
+        User user = userRepository.findById(ordersRequestDto.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
         orders.setUser(user);
 
         List<OrdersProductRequestDto> ordersProductRequestDtos = ordersRequestDto.getOrdersProductRequestDtos(); // 주문목록을 추출

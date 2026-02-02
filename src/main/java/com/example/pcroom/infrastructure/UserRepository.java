@@ -21,8 +21,11 @@ public class UserRepository {
         return user;
     }
 
-    public User findById(Long id) {
-        return em.find(User.class, id);
+    public Optional<User> findById(Long id) {
+
+        User user = em.find(User.class, id);
+
+        return Optional.ofNullable(user);
     }
 
     public Optional<User> findByUsername(String username) {

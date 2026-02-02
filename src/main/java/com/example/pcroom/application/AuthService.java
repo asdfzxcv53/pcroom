@@ -83,7 +83,7 @@ public class AuthService {
                     log.error("[Login] user not found after authencation username = {}",
                             userDetails.getUsername());
 
-                    return new UsernameNotFoundException("username not found")
+                    return new UsernameNotFoundException("username not found");
                 });
 
         refreshTokenRepository.deleteByUserId(loginUser.getId());
@@ -138,11 +138,11 @@ public class AuthService {
     public ReissueResponse reissue(String refreshToken) {
         log.info("[Reissue] request start");
 
-        if(refreshToken == null || refreshToken.isEmpty()){
+        if (refreshToken == null || refreshToken.isEmpty()) {
             log.warn("[Reissue] refresh token is empty");
             throw new RefreshTokenNotFoundException("refresh token not found");
         }
-        if(jwtUtil.isTokenExpired(refreshToken)){
+        if (jwtUtil.isTokenExpired(refreshToken)) {
             log.warn("[Reissue] refresh token is expired");
             throw new RefreshTokenExpiredException("refresh token expired");
         }
@@ -160,7 +160,7 @@ public class AuthService {
                     // 이 경우 저장이 잘못되거나 토큰의 위조 가능성
                     log.warn("[Reissue] refresh token not found userId={}",
                             user.getId());
-                    return new RefreshTokenNotFoundException("refresh token not found")
+                    return new RefreshTokenNotFoundException("refresh token not found");
                 });
 
         if(savedRefreshToken.isRevoked()){
