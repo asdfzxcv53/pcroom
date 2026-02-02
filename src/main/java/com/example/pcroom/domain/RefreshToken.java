@@ -13,22 +13,21 @@ public class RefreshToken {
 
 //    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 //    @Column(name = "REFRESHTOKEN_ID")
-//    @JsonIgnore
 //    private Long id;
 
-    @Column
+//    @Column
     private Long userId;
 
-    @Column(nullable = false, length = 255)
+//    @Column(nullable = false, length = 255)
     private String hashedToken;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private LocalDateTime expiresAt;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private boolean revoked;
 
-    @Column(nullable = false, updatable = false)
+//    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     public RefreshToken() {}

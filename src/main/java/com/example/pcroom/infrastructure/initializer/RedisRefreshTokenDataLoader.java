@@ -29,7 +29,7 @@ public class RedisRefreshTokenDataLoader implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        for(int i = 1; i <= 1000; i++){
+        for(int i = 1; i <= 20000; i++){
             User user = new User("asdf"+i, "1234", "User"+i, "010"+i, Role.USER);
             User savedUser = userRepository.save(user);
 

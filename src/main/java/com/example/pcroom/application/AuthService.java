@@ -8,6 +8,7 @@ import com.example.pcroom.presentation.LoginRequestDto;
 import com.example.pcroom.presentation.LoginResult;
 import com.example.pcroom.presentation.ReissueResponse;
 import com.example.pcroom.presentation.user.UserSummary;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
+@Slf4j
 @Transactional
 public class AuthService {
 
@@ -46,23 +48,43 @@ public class AuthService {
     }
 
     public LoginResult login(LoginRequestDto loginRequestDto) {
+        log.info("[Login] request username{}, password{}",
+                loginRequestDto.getUsername(),
+                loginRequestDto.getPassword());
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequestDto.getUsername(),
-                        loginRequestDto.getPassword()
-                )
-        ); // id and password 검증. 잘못되면 exception 던져진다.
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequestDto.getUsername(),
+                            loginRequestDto.getPassword()
+                    )
+            );// id and password 검증. 잘못되면 exception 던져진다.
+        } catch (Exception e) {
+            log.warn("[Login] authentication failed username={}",
+                    loginRequestDto.getUsername());
+
+            throw e;
+        }
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         // 가져온 인증객체에서 유저정보 가져오기.
+
+        log.debug("[Login] authentication success username={}",
+                userDetails.getUsername());
 
         String accessToken = jwtUtil.generateAccessToken(userDetails);
         String refreshToken = jwtUtil.generateRefreshToken(userDetails);
         // accesstoken, refreshtoken generate
 
         User loginUser = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("username not found"));
+                .orElseThrow(() -> {
+                    // 인증 후에 유저를 못찾는 상황은 중요 에러
+                    log.error("[Login] user not found after authencation username = {}",
+                            userDetails.getUsername());
+
+                    return new UsernameNotFoundException("username not found")
+                });
 
         refreshTokenRepository.deleteByUserId(loginUser.getId());
         // 존재하던 refreshToken 삭제 해주거나, 아니면 db에 로그기록으로 남기거나 선택
@@ -74,12 +96,25 @@ public class AuthService {
         Seat seat = seatRepository.findBySeatNumber(loginRequestDto.getSeatNumber());
 
         LocalDateTime endTime;
-        Optional<RemainTime> remainTime = remainTimeRepository.findRemainTime(loginUser.getId());
-        if(remainTime.get().getRemainTime() == 0){
-            throw new NoRemainTimeException("시간을 충전해주세요."); // 남은시간이 없는경우 충전하라고 exception 보냄
+        RemainTime remainTime = remainTimeRepository.findRemainTime(loginUser.getId())
+                .orElseThrow(() -> {
+                    log.warn("[Login] remain time entity not made userId={}",
+                            loginUser.getId());
+                    return new RemainTimeNotFoundException("remain time entity not found");
+                });
+
+        if(remainTime.getRemainTime() == 0) {
+            // 남은시간이 없는경우
+            log.warn("[Login] no remain time userId = {}",
+                    loginUser.getId());
+            throw new NoRemainTimeException("시간을 충전해주세요.");
         } else {
-            endTime = LocalDateTime.now().plusSeconds(remainTime.get().getRemainTime()); // 남은시간이 있는경우 현재시간+남은시간으로 endTime 계산
-            remainTime.get().login(endTime); // 로그인한 경우 remainTime 을 저장.
+            endTime = LocalDateTime.now().plusSeconds(remainTime.getRemainTime()); // 남은시간이 있는경우 현재시간+남은시간으로 endTime 계산
+            remainTime.login(endTime); // 로그인한 경우 remainTime 을 저장.
+
+            log.info("[Login] login time={}, userId={}",
+                    LocalDateTime.now(),
+                    loginUser.getId());
         }
 
         SeatHistory seatHistory = new SeatHistory(seat, loginUser, LocalDateTime.now(), null);
@@ -94,32 +129,61 @@ public class AuthService {
         LoginResult loginResult = new LoginResult(accessToken, refreshToken, userSummary);
         // endTime 정보를 클라이언트에게 보내 화면에 띄어줌.
 
+        log.info("[Login] success userId={}",
+                loginUser.getId());
+
         return loginResult;
     }
 
     public ReissueResponse reissue(String refreshToken) {
+        log.info("[Reissue] request start");
+
         if(refreshToken == null || refreshToken.isEmpty()){
+            log.warn("[Reissue] refresh token is empty");
             throw new RefreshTokenNotFoundException("refresh token not found");
         }
         if(jwtUtil.isTokenExpired(refreshToken)){
+            log.warn("[Reissue] refresh token is expired");
             throw new RefreshTokenExpiredException("refresh token expired");
         }
         String username = jwtUtil.extractUsername(refreshToken);
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("username not found"));
+                .orElseThrow(() -> {
+                    // 이 경우 토큰이 있는데 user 가 없음.
+                    // 토큰 위조, 탈취 가능성
+                    log.error("[Reissue] user not found with refresh token");
+                    return new UsernameNotFoundException("username not found");
+                });
 
         RefreshToken savedRefreshToken = refreshTokenRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new RefreshTokenNotFoundException("refresh token not found"));
+                .orElseThrow(() -> {
+                    // 이 경우 저장이 잘못되거나 토큰의 위조 가능성
+                    log.warn("[Reissue] refresh token not found userId={}",
+                            user.getId());
+                    return new RefreshTokenNotFoundException("refresh token not found")
+                });
 
         if(savedRefreshToken.isRevoked()){
+            log.warn("[Reissue] revoked refresh token userId={}",
+                    user.getId());
             throw new RefreshTokenRevokedException("refresh token revoked");
         }
         if(savedRefreshToken.isExpired()){
+            log.warn("[Reissue] refresh token expired userId={}",
+                    user.getId());
             throw new RefreshTokenExpiredException("refresh token expired");
         }
 
         String newAccessToken = jwtUtil.generateAccessToken(user);
-        UserSummary userSummary = new UserSummary(user.getId(), username, user.getRole(), user.getRemainTime().getEndTime());
+        UserSummary userSummary = new UserSummary(
+                user.getId(),
+                username,
+                user.getRole(),
+                user.getRemainTime().getEndTime()
+        );
+
+        log.info("[Reissue] success userId={}",
+                user.getId());
 
         return new ReissueResponse(newAccessToken, userSummary);
     }

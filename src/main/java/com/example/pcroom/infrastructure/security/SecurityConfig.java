@@ -23,13 +23,7 @@ public class SecurityConfig {
     public SecurityConfig(final JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
-
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web -> web.ignoring()
-                .requestMatchers("/refreshToken"));
-    }
-
+    
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -37,7 +31,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/user", "/login", "/remainTime").permitAll()
+                        .requestMatchers("/user", "/login", "/remainTime", "/refreshToken").permitAll()
                         .requestMatchers("/seathistory", "/orders").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )

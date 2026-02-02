@@ -51,4 +51,10 @@ public class GlobalExceptionHandler {
     public Map<String, String> handleUsernameNotFoundException(UsernameNotFoundException e) {
         return Map.of("error", e.getMessage());
     }
+
+    @ExceptionHandler(RemainTimeNotFoundException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleRemainTimeNotFoundException(RemainTimeNotFoundException e) {
+        return Map.of("error", e.getMessage());
+    }
 }

@@ -20,10 +20,10 @@ public class RedisRefreshTokenRepository implements RefreshTokenRepository {
 
     private static final String KEY_PREFIX = "refresh_token:";
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, RefreshToken> redisTemplate;
 
     @Autowired
-    public RedisRefreshTokenRepository(RedisTemplate<String, Object> redisTemplate) {
+    public RedisRefreshTokenRepository(RedisTemplate<String, RefreshToken> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
@@ -51,9 +51,9 @@ public class RedisRefreshTokenRepository implements RefreshTokenRepository {
     @Override
     public Optional<RefreshToken> findByUserId(Long userId) {
         String key = generateKey(userId);
-        Object value = redisTemplate.opsForValue().get(key);
-        if (value != null) {
-            return Optional.of((RefreshToken) value);
+        RefreshToken refreshToken = redisTemplate.opsForValue().get(key);
+        if (refreshToken != null) {
+            return Optional.of(refreshToken);
         }
         return Optional.empty();
     }
