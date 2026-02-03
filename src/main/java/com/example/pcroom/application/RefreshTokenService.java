@@ -21,6 +21,7 @@ public class RefreshTokenService {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
+    // K6 테스트를 위한 메서드
     public RefreshTokenResponse createRefreshToken(Long userId) {
         RefreshToken refreshToken = RefreshToken.create(userId, "hashedToken" + userId, Duration.ofDays(14));
         RefreshToken savedRefreshToken = refreshTokenRepository.save(refreshToken);
@@ -29,7 +30,8 @@ public class RefreshTokenService {
         return refreshTokenResponse;
     }
 
-    public RefreshTokenResponse findAll(Long userId) {
+    // K6 테스트를 위한 메서드
+    public RefreshTokenResponse findByUserId(Long userId) {
 
         RefreshToken refreshToken = refreshTokenRepository.findByUserId(userId)
                 .orElse(null);

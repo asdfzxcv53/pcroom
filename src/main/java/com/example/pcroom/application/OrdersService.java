@@ -65,7 +65,7 @@ public class OrdersService {
         orders.setTotalPrice(totalPrice);
 
         Orders savedOrders = ordersRepository.save(orders);
-        
+
         log.info("[Order] order create success orderId = {}",
                 savedOrders.getId());
 

@@ -5,11 +5,13 @@ import com.example.pcroom.infrastructure.RemainTimeRepository;
 import com.example.pcroom.presentation.remaintime.RemainTimeRequestDto;
 import com.example.pcroom.presentation.remaintime.RemainTimeResponseDto;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@Slf4j
 @Transactional
 public class RemainTimeService {
 
@@ -20,9 +22,14 @@ public class RemainTimeService {
     }
 
     public RemainTimeResponseDto addRemainTime(RemainTimeRequestDto remainTimeRequestDto) {
-        // 로그인 되어있으면 endTime 을 더해주고 로그아웃 되어있으면 remainTime 에 더해준다.
+        // 누가 얼마나 충전했는지
+        log.info("[RemainTime] add time userId = {}, add time = {}",
+                remainTimeRequestDto.getUserId(),
+                remainTimeRequestDto.getAddTime()
+        );
 
-        RemainTime remainTime = remainTimeRepository.findRemainTime(remainTimeRequestDto.getMemberId()).orElseThrow();
+        // 로그인 되어있으면 endTime 을 더해주고 로그아웃 되어있으면 remainTime 에 더해준다.
+        RemainTime remainTime = remainTimeRepository.findRemainTime(remainTimeRequestDto.getUserId()).orElseThrow();
 
         //remainTime 에 충전하는 시간을 더해준다.
         remainTime.addRemainTime(remainTimeRequestDto.getAddTime());

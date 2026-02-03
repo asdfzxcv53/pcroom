@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 public class RemainTimeRequestDto {
 
-    private Long memberId;
+    private Long userId;
     private Long addTime;
 }

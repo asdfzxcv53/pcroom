@@ -27,8 +27,8 @@ public class RefreshTokenController {
     }
 
     @GetMapping
-    public ResponseEntity<RefreshTokenResponse> findAll(@RequestParam Long userId){
-        RefreshTokenResponse refreshTokenResponse = refreshTokenService.findAll(userId);
+    public ResponseEntity<RefreshTokenResponse> findByUserId(@RequestParam Long userId){
+        RefreshTokenResponse refreshTokenResponse = refreshTokenService.findByUserId(userId);
 
         return ResponseEntity.ok(refreshTokenResponse);
     }

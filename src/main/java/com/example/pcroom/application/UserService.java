@@ -9,6 +9,7 @@ import com.example.pcroom.infrastructure.UserRepository;
 import com.example.pcroom.presentation.user.UserRequestDto;
 import com.example.pcroom.presentation.user.UserResponseDto;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
+@Slf4j
 @Transactional
 public class UserService {
 
@@ -36,7 +38,12 @@ public class UserService {
     }
 
     public UserResponseDto addUser(UserRequestDto userRequestDto) {     //  회원가입
+        log.info("[User] sign in username = {}, name = {}",
+                userRequestDto.getUsername(),
+                userRequestDto.getName()
+        );
 
+        // username 중복 확인
         checkDuplicatioAccount(userRequestDto.getUsername());
 
         User user = User.builder()
@@ -70,8 +77,9 @@ public class UserService {
     public void checkDuplicatioAccount(String username) {
         userRepository.findByUsername(username)
                 .ifPresent(user -> {
+                    log.warn("[User] username duplicate username = {}",
+                            username);
                     throw new DuplicateAccountException("이미 존재하는 아이디 입니다.");
                 });
     }
-
 }
