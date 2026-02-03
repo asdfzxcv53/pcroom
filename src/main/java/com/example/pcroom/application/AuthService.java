@@ -48,9 +48,8 @@ public class AuthService {
     }
 
     public LoginResult login(LoginRequestDto loginRequestDto) {
-        log.info("[Login] request username{}, password{}",
-                loginRequestDto.getUsername(),
-                loginRequestDto.getPassword());
+        log.info("[Login] request username = {}",
+                loginRequestDto.getUsername());
 
         Authentication authentication;
         try {

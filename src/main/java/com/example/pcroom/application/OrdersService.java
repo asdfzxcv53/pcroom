@@ -12,6 +12,7 @@ import com.example.pcroom.presentation.orders.OrdersProductResponseDto;
 import com.example.pcroom.presentation.orders.OrdersRequestDto;
 import com.example.pcroom.presentation.orders.OrdersResponseDto;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 @Transactional
 public class OrdersService {
 
@@ -35,13 +37,19 @@ public class OrdersService {
     }
 
     public OrdersResponseDto createOrder(OrdersRequestDto ordersRequestDto) {
+        log.info("[Order] order create userId = {}",
+                ordersRequestDto.getUserId());
 
         int totalPrice = 0;
 
         Orders orders = new Orders();
         orders.setOrderTime(LocalDateTime.now());
         User user = userRepository.findById(ordersRequestDto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> {
+                    log.warn("[Order] User not found userId = {}",
+                            ordersRequestDto.getUserId());
+                    return new RuntimeException("User not found");
+                });
         orders.setUser(user);
 
         List<OrdersProductRequestDto> ordersProductRequestDtos = ordersRequestDto.getOrdersProductRequestDtos(); // 주문목록을 추출
@@ -57,6 +65,10 @@ public class OrdersService {
         orders.setTotalPrice(totalPrice);
 
         Orders savedOrders = ordersRepository.save(orders);
+        
+        log.info("[Order] order create success orderId = {}",
+                savedOrders.getId());
+
         OrdersResponseDto ordersResponseDto = new OrdersResponseDto();
 
         List<OrdersProductResponseDto> ordersProductResponseDtos = savedOrders.getOrdersProducts()
@@ -72,6 +84,8 @@ public class OrdersService {
     }
 
     public List<OrdersResponseDto> getOrdersByUserId(Long userId) {
+        log.info("[Order] find order by userId = {}", userId);
+
         List<Orders> orders = ordersRepository.findOrdersByUserId(userId);
 
         List<OrdersResponseDto> ordersResponseDtos = new ArrayList<>();
