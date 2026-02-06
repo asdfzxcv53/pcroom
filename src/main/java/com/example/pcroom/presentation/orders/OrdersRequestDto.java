@@ -10,5 +10,5 @@ import java.util.List;
 @Setter
 public class OrdersRequestDto {
     private Long userId;
-    List<OrdersProductRequestDto> ordersProductRequestDtos = new ArrayList<>();
+    private List<OrdersProductRequestDto> ordersProductRequestDtos = new ArrayList<>();
 }

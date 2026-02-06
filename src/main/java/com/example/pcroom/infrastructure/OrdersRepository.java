@@ -7,6 +7,7 @@ import jakarta.persistence.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class OrdersRepository {
@@ -17,6 +18,10 @@ public class OrdersRepository {
     public Orders save(Orders orders) {
         em.persist(orders);
         return orders;
+    }
+
+    public Optional<Orders> findById(Long id) {
+        return Optional.ofNullable(em.find(Orders.class, id));
     }
 
     public List<Orders> findOrdersByUserId(Long userId) {

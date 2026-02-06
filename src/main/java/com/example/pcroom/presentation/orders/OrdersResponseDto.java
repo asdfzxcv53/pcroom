@@ -4,6 +4,7 @@ import com.example.pcroom.domain.Orders;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,9 +13,7 @@ import java.util.List;
 public class OrdersResponseDto {
 
     private Long orderId;
-    List<OrdersProductResponseDto> ordersProductResponseDtos = new ArrayList<>();
-
-    public void addOrdersProductResponseDto(OrdersProductResponseDto ordersProductResponseDto) {
-        ordersProductResponseDtos.add(ordersProductResponseDto);
-    }
+    private LocalDateTime orderTime;
+    private int quantity;
+    private List<OrdersProductResponseDto> ordersProductResponseDtos = new ArrayList<>();
 }

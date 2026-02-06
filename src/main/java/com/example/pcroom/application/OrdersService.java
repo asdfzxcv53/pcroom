@@ -1,9 +1,6 @@
 package com.example.pcroom.application;
 
-import com.example.pcroom.domain.Orders;
-import com.example.pcroom.domain.OrdersProduct;
-import com.example.pcroom.domain.Product;
-import com.example.pcroom.domain.User;
+import com.example.pcroom.domain.*;
 import com.example.pcroom.infrastructure.OrdersRepository;
 import com.example.pcroom.infrastructure.ProductRepository;
 import com.example.pcroom.infrastructure.UserRepository;
@@ -41,6 +38,7 @@ public class OrdersService {
                 ordersRequestDto.getUserId());
 
         int totalPrice = 0;
+        int quantity = 0;
 
         Orders orders = new Orders();
         orders.setOrderTime(LocalDateTime.now());
@@ -58,11 +56,16 @@ public class OrdersService {
             Product product = productRepository.findById(ordersProductRequestDto.getProductId());
             product.removeQuantity(ordersProductRequestDto.getProductQuantity()); // 상품 재고에서 수량만큼 빼기 ( 수량 부족하면 exception )
             totalPrice += product.getPrice() * ordersProductRequestDto.getProductQuantity(); // 총 가격 계산
+            quantity += ordersProductRequestDto.getProductQuantity();
 
             OrdersProduct ordersProduct = new OrdersProduct(orders, product, ordersProductRequestDto.getProductQuantity(), product.getPrice());
             orders.addOrdersProduct(ordersProduct); // cascade.ALL 로 orderProduct 는 order 과 같이 저장
         }
         orders.setTotalPrice(totalPrice);
+        orders.setQuantity(quantity);
+
+        // 처음 만들어질때는 결제 전까지 대기 상태
+        orders.changeStatus(OrderStatus.PENDING);
 
         Orders savedOrders = ordersRepository.save(orders);
 
@@ -79,6 +82,8 @@ public class OrdersService {
 
         ordersResponseDto.setOrdersProductResponseDtos(ordersProductResponseDtos);
         ordersResponseDto.setOrderId(savedOrders.getId());
+        ordersResponseDto.setOrderTime(savedOrders.getOrderTime());
+        ordersResponseDto.setQuantity(quantity);
 
         return ordersResponseDto;
     }

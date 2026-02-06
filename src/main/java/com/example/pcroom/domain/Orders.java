@@ -19,6 +19,9 @@ public class Orders {
     private int totalPrice;
 
     @Column(nullable = false)
+    private int quantity;
+
+    @Column(nullable = false)
     private LocalDateTime orderTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -27,6 +30,12 @@ public class Orders {
 
     @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL)
     private List<OrdersProduct> ordersProducts = new ArrayList<>();
+
+    @OneToOne(mappedBy = "orders", cascade = CascadeType.ALL)
+    private KakaoTid kakaoTid;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
 
     public void addOrdersProduct(OrdersProduct ordersProduct) {
         ordersProducts.add(ordersProduct);
@@ -43,5 +52,13 @@ public class Orders {
 
     public void setOrderTime(LocalDateTime orderTime) {
         this.orderTime = orderTime;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public void changeStatus(OrderStatus status) {
+        this.status = status;
     }
 }
