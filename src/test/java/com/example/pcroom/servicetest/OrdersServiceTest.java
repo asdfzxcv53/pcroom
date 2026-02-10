@@ -25,6 +25,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -51,6 +52,7 @@ public class OrdersServiceTest {
 
     private OrdersProductRequestDto oprd1;
     private OrdersProductRequestDto oprd2;
+    private OrdersProductRequestDto oprd3;
 
     @BeforeEach
     void setUp() {
@@ -72,7 +74,11 @@ public class OrdersServiceTest {
 
         oprd2 = new OrdersProductRequestDto();
         oprd2.setProductId(2L);
-        oprd2.setProductQuantity(10);
+        oprd2.setProductQuantity(15);
+
+        oprd3 = new OrdersProductRequestDto();
+        oprd3.setProductId(2L);
+        oprd3.setProductQuantity(2000);
     }
 
     @Test
@@ -93,7 +99,7 @@ public class OrdersServiceTest {
 
         // WHen
 
-        when(userRepository.findById(1L)).thenReturn(user);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(productRepository.findById(1L)).thenReturn(product1);
         when(productRepository.findById(2L)).thenReturn(product2);
         when(ordersRepository.save(any(Orders.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -107,7 +113,7 @@ public class OrdersServiceTest {
                 .extracting("productId", "productName", "productPrice", "productQuantity")
                 .containsExactly(
                         tuple(null, "abc", 1000, 5),
-                        tuple(null, "def", 2000, 10)
+                        tuple(null, "def", 2000, 15)
                 );
 
 
@@ -120,7 +126,7 @@ public class OrdersServiceTest {
 
         User user = new User();
 
-        List<OrdersProductRequestDto> ordersProductRequestDtos = List.of(oprd1, oprd2);
+        List<OrdersProductRequestDto> ordersProductRequestDtos = List.of(oprd1, oprd3);
 
         OrdersRequestDto ordersRequestDto = new OrdersRequestDto();
         ordersRequestDto.setUserId(1L);
@@ -128,9 +134,10 @@ public class OrdersServiceTest {
 
         // WHen
 
-        when(userRepository.findById(1L)).thenReturn(user);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(productRepository.findById(1L)).thenReturn(product1);
         when(productRepository.findById(2L)).thenReturn(product2);
+        //when(ordersRepository.save(any(Orders.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Then
 

@@ -17,26 +17,15 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisTestConfig {
 
     @Bean
-    public ObjectMapper objectMapper() {
+    public RedisTemplate<String, RefreshToken> refreshTokenRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-        objectMapper.activateDefaultTyping(
-                LaissezFaireSubTypeValidator.instance,
-                ObjectMapper.DefaultTyping.NON_FINAL
-        );
-
-        return objectMapper;
-    }
-
-    @Bean
-    public RedisTemplate<String, Object> refreshTokenRedisTemplate(RedisConnectionFactory redisConnectionFactory, ObjectMapper objectMapper) {
-        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        RedisTemplate<String, RefreshToken> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
 
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(objectMapper, RefreshToken.class));
 
         return redisTemplate;
     }
