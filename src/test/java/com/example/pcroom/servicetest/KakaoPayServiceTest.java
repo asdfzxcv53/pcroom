@@ -181,4 +181,40 @@ public class KakaoPayServiceTest {
                 () -> kakaoPayService.cancelAfterPay(orderId)
         );
     }
+
+    @Test
+    @DisplayName("결제 이전 cancel 성공")
+    public void cancel_before_pay_success() {
+        //Given
+        Long orderId = 1L;
+
+        Orders orders = new Orders();
+        orders.changeStatus(OrderStatus.PENDING);
+
+        when(ordersRepository.findById(orderId)).thenReturn(Optional.of(orders));
+
+        //When
+        kakaoPayService.cancelBeforePay(orderId);
+
+        //Then
+        assertThat(orders.getStatus()).isEqualTo(OrderStatus.CANCELED);
+    }
+
+    @Test
+    @DisplayName("결제 이전 cancel 상태 이상 실패")
+    public void cancel_before_pay_fail_status() {
+        //Given
+        Long orderId = 1L;
+
+        Orders orders = new Orders();
+        orders.changeStatus(OrderStatus.PAID);
+
+        when(ordersRepository.findById(orderId)).thenReturn(Optional.of(orders));
+
+        //When&Then
+        assertThrows(
+                KakaoPayCantCancelException.class,
+                () -> kakaoPayService.cancelBeforePay(orderId)
+        );
+    }
 }

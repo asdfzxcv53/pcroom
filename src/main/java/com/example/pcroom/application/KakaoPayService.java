@@ -175,6 +175,11 @@ public class KakaoPayService {
                     return new OrdersNotFoundException("orders not found");
                 });
 
+        if(orders.getStatus() != OrderStatus.PENDING) {
+            log.warn("[KakaoPay] cancel before pay orders cant cancel because not pending ordersId = {}",
+                    orderId);
+            throw new KakaoPayCantCancelException("order is not pending");
+        }
         orders.changeStatus(OrderStatus.CANCELED);
         // 아직 결제가 이루어지지 않아서 order 의 상태만 바꿔준다
         log.info("[KakaoPay] cancel before pay success ordersId = {}",
