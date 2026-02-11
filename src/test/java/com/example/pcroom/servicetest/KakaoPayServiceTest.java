@@ -2,10 +2,13 @@ package com.example.pcroom.servicetest;
 
 import com.example.pcroom.application.KakaoPayService;
 import com.example.pcroom.domain.*;
+import com.example.pcroom.domain.exception.KakaoPayCantCancelException;
 import com.example.pcroom.domain.exception.KakaoPayReadyException;
 import com.example.pcroom.infrastructure.KakaoTidRepository;
 import com.example.pcroom.infrastructure.OrdersRepository;
+import com.example.pcroom.presentation.kakao.KakaoCancelResponse;
 import com.example.pcroom.presentation.kakao.KakaoReadyResponse;
+import com.example.pcroom.presentation.orders.OrdersCancelResponse;
 import com.example.pcroom.presentation.orders.OrdersResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -125,4 +128,57 @@ public class KakaoPayServiceTest {
 
     @Test
     @DisplayName("결제 이후 cancel 요청 성공")
+    public void cancel_after_pay_success() {
+        //Given
+        Long orderId = 1L;
+
+        Orders orders = new Orders();
+        KakaoTid kakaoTid = mock(KakaoTid.class);
+        User user = mock(User.class);
+        orders.changeStatus(OrderStatus.PAID);
+        orders.setTotalPrice(10000);
+        orders.setKakaoTid(kakaoTid);
+        orders.setUser(user);
+
+
+        KakaoCancelResponse kakaoCancelResponse =
+                new KakaoCancelResponse();
+
+        ResponseEntity<KakaoCancelResponse> response =
+                ResponseEntity.ok(kakaoCancelResponse);
+
+        when(ordersRepository.findById(orderId)).thenReturn(Optional.of(orders));
+        when(kakaoPayProperties.getCid()).thenReturn("cid");
+        when(restTemplate.postForEntity(
+                anyString(),
+                any(),
+                eq(KakaoCancelResponse.class)
+        )).thenReturn(response);
+
+        //When
+        OrdersCancelResponse result =
+                kakaoPayService.cancelAfterPay(1L);
+
+        //Then
+        assertThat(result.getCancelAmount()).isEqualTo(10000);
+        assertThat(orders.getStatus()).isEqualTo(OrderStatus.CANCELED);
+    }
+
+    @Test
+    @DisplayName("결제 이후 상태 이상으로 cancel 실패")
+    public void cancel_after_pay_fail_not_paid() {
+        //Given
+        Long orderId = 1L;
+
+        Orders orders = new Orders();
+        orders.changeStatus(OrderStatus.PENDING);
+
+        when(ordersRepository.findById(orderId)).thenReturn(Optional.of(orders));
+
+        //When&Then
+        assertThrows(
+                KakaoPayCantCancelException.class,
+                () -> kakaoPayService.cancelAfterPay(orderId)
+        );
+    }
 }

@@ -58,6 +58,8 @@ public class Orders {
         this.quantity = quantity;
     }
 
+    public void setKakaoTid(KakaoTid kakaoTid) {this.kakaoTid = kakaoTid;}
+
     public void changeStatus(OrderStatus status) {
         this.status = status;
     }
