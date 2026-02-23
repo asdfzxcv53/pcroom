@@ -37,6 +37,9 @@ public class Orders {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
+    @Enumerated(EnumType.STRING)
+    private OrderType orderType;
+
     public void addOrdersProduct(OrdersProduct ordersProduct) {
         ordersProducts.add(ordersProduct);
     }
@@ -59,6 +62,8 @@ public class Orders {
     }
 
     public void setKakaoTid(KakaoTid kakaoTid) {this.kakaoTid = kakaoTid;}
+
+    public void setOrderType(OrderType orderType) {this.orderType = orderType;}
 
     public void changeStatus(OrderStatus status) {
         this.status = status;

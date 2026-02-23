@@ -1,9 +1,6 @@
 package com.example.pcroom.application;
 
-import com.example.pcroom.domain.KakaoPayProperties;
-import com.example.pcroom.domain.KakaoTid;
-import com.example.pcroom.domain.OrderStatus;
-import com.example.pcroom.domain.Orders;
+import com.example.pcroom.domain.*;
 import com.example.pcroom.domain.exception.*;
 import com.example.pcroom.infrastructure.KakaoTidRepository;
 import com.example.pcroom.infrastructure.OrdersRepository;
@@ -153,6 +150,12 @@ public class KakaoPayService {
 
             orders.changeStatus(OrderStatus.PAID);
             // 이 시점에 주문이 들어간다.
+
+            // 이 주문이 시간 충전 이라면 1000원에 한시간으로 계산
+            if(orders.getOrderType() == OrderType.TIME){
+                long addSecond = (orders.getTotalPrice() / 1000) * 60 * 60;
+                orders.getUser().getRemainTime().addRemainTime(addSecond);
+            }
 
             return response.getBody();
         } catch (RestClientException e) {

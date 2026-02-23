@@ -67,6 +67,9 @@ public class OrdersService {
         // 처음 만들어질때는 결제 전까지 대기 상태
         orders.changeStatus(OrderStatus.PENDING);
 
+        // 받은 주문이 시간 충전인지, 음식 주문인지 여기서 구분
+        orders.setOrderType(ordersRequestDto.getOrdersType());
+
         Orders savedOrders = ordersRepository.save(orders);
 
         log.info("[Order] order create success orderId = {}",
