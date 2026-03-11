@@ -1,5 +1,6 @@
 package com.example.pcroom.infrastructure;
 
+import com.example.pcroom.domain.OrderStatus;
 import com.example.pcroom.domain.Orders;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -30,5 +31,18 @@ public class OrdersRepository {
                         "where o.user.id = :userId", Orders.class)
                 .setParameter("userId", userId)
                 .getResultList();
+    }
+
+    public int updateStatusIfPending(Long orderId, OrderStatus status) {
+        return em.createQuery(
+                "update Orders o " +
+                "set o.status = :status " +
+                "where o.id = :orderId " +
+                "and o.status = :pending"
+        )
+                .setParameter("status", status)
+                .setParameter("orderId", orderId)
+                .setParameter("pending", OrderStatus.PENDING)
+                .executeUpdate();
     }
 }

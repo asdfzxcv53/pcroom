@@ -148,8 +148,16 @@ public class KakaoPayService {
             log.info("[KakaoPay] approve success orderId={}",
                     orders.getId());
 
-            orders.changeStatus(OrderStatus.PAID);
-            // 이 시점에 주문이 들어간다.
+            int updated = ordersRepository.updateStatusIfPending(
+                    orderId,
+                    OrderStatus.PAID
+            );
+            // 상태를 atomic 하게 update 해줘서 race condition 해결
+            // 결과가 1이면 변경, 0이면 에러
+            if (updated == 0) {
+                log.warn("[KakaoPay] approve failed because order not pending orderId={}", orderId);
+                throw new KakaoPayFailException("order already processed");
+            }
 
             // 이 주문이 시간 충전 이라면 1000원에 한시간으로 계산
             if(orders.getOrderType() == OrderType.TIME){
@@ -178,11 +186,17 @@ public class KakaoPayService {
                     return new OrdersNotFoundException("orders not found");
                 });
 
-        if(orders.getStatus() != OrderStatus.PENDING) {
-            log.warn("[KakaoPay] cancel before pay orders cant cancel because not pending ordersId = {}",
-                    orderId);
-            throw new KakaoPayCantCancelException("order is not pending");
+        int updated = ordersRepository.updateStatusIfPending(
+                orderId,
+                OrderStatus.CANCELED
+        );
+        // 여기도 마찬가지로 atomic 하게 update 해준다.
+
+        if (updated == 0) {
+            log.warn("[KakaoPay] cancel failed because order not pending ordersId = {}", orderId);
+            throw new KakaoPayCantCancelException("order already processed");
         }
+
         orders.changeStatus(OrderStatus.CANCELED);
         // 아직 결제가 이루어지지 않아서 order 의 상태만 바꿔준다
         log.info("[KakaoPay] cancel before pay success ordersId = {}",
