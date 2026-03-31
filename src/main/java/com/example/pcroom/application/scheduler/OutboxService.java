@@ -1,13 +1,13 @@
-package com.example.pcroom.application;
+package com.example.pcroom.application.scheduler;
 
 import com.example.pcroom.FakeMessageSender;
 import com.example.pcroom.domain.OutboxEvent;
 import com.example.pcroom.domain.OutboxStatus;
 import com.example.pcroom.infrastructure.OutboxEventRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,6 +22,7 @@ public class OutboxService {
     }
 
     @Transactional
+    @Scheduled(fixedRate = 1000)
     public void publishPendingEvents() {
         List<OutboxEvent> events =
                 outboxEventRepository.findByStatus(OutboxStatus.PENDING);

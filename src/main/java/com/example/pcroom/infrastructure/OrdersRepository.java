@@ -45,4 +45,15 @@ public class OrdersRepository {
                 .setParameter("pending", OrderStatus.PENDING)
                 .executeUpdate();
     }
+
+    public List<Orders> findApprovingOrdersWithTid(OrderStatus status) {
+        return em.createQuery(
+                    "select o from Orders o " +
+                        "join fetch o.kakaoTid kt " +
+                        "where o.status = :status",
+                        Orders.class
+        )
+                .setParameter("status", status)
+                .getResultList();
+    }
 }
