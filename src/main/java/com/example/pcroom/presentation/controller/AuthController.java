@@ -2,10 +2,10 @@ package com.example.pcroom.presentation.controller;
 
 import com.example.pcroom.application.AuthService;
 import com.example.pcroom.application.LogoutService;
-import com.example.pcroom.presentation.LoginRequestDto;
-import com.example.pcroom.presentation.LoginResponseDto;
-import com.example.pcroom.presentation.LoginResult;
-import com.example.pcroom.presentation.ReissueResponse;
+import com.example.pcroom.presentation.login.LoginRequestDto;
+import com.example.pcroom.presentation.login.LoginResponseDto;
+import com.example.pcroom.presentation.login.LoginResult;
+import com.example.pcroom.presentation.login.ReissueResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;

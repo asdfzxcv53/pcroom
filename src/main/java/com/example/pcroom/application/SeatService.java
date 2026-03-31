@@ -2,7 +2,7 @@ package com.example.pcroom.application;
 
 import com.example.pcroom.domain.Seat;
 import com.example.pcroom.infrastructure.SeatRepository;
-import com.example.pcroom.presentation.SeatResponseDto;
+import com.example.pcroom.presentation.seat.SeatResponseDto;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

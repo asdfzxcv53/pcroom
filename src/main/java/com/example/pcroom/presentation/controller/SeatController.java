@@ -1,7 +1,7 @@
 package com.example.pcroom.presentation.controller;
 
 import com.example.pcroom.application.SeatService;
-import com.example.pcroom.presentation.SeatResponseDto;
+import com.example.pcroom.presentation.seat.SeatResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

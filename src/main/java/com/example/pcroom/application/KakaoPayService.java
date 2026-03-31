@@ -4,9 +4,12 @@ import com.example.pcroom.domain.*;
 import com.example.pcroom.domain.exception.*;
 import com.example.pcroom.infrastructure.KakaoTidRepository;
 import com.example.pcroom.infrastructure.OrdersRepository;
+import com.example.pcroom.infrastructure.OutboxEventRepository;
 import com.example.pcroom.presentation.kakao.*;
 import com.example.pcroom.presentation.orders.OrdersCancelResponse;
+import com.example.pcroom.presentation.orders.OrdersProductResponseDto;
 import com.example.pcroom.presentation.orders.OrdersResponseDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +23,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Locale;
 
 @Service
@@ -30,6 +35,7 @@ public class KakaoPayService {
     private final KakaoTidRepository tidRepository;
     private final KakaoPayProperties kakaoPayProperties;
     private final OrdersRepository ordersRepository;
+    private final OutboxEventRepository outboxEventRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private static final String READY_URL = "https://open-api.kakaopay.com/online/v1/payment/ready";
@@ -37,10 +43,11 @@ public class KakaoPayService {
     private static final String CANCEL_URL = "https://open-api.kakaopay.com/online/v1/payment/cancel";
 
     @Autowired
-    public KakaoPayService(KakaoTidRepository tidRepository, KakaoPayProperties kakaoPayProperties, OrdersRepository ordersRepository, RestTemplate restTemplate, ObjectMapper objectMapper) {
+    public KakaoPayService(KakaoTidRepository tidRepository, KakaoPayProperties kakaoPayProperties, OrdersRepository ordersRepository, OutboxEventRepository outboxEventRepository, RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.tidRepository = tidRepository;
         this.kakaoPayProperties = kakaoPayProperties;
         this.ordersRepository = ordersRepository;
+        this.outboxEventRepository = outboxEventRepository;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
     }
@@ -136,6 +143,18 @@ public class KakaoPayService {
         HttpEntity<KakaoApproveRequest> entity =
                 new HttpEntity<>(kakaoApproveRequest, headers);
 
+        // PENDING 상태 확인
+        int updated = ordersRepository.updateStatusIfPending(
+                orderId,
+                OrderStatus.PAID
+        );
+        // 상태를 atomic 하게 update 해줘서 race condition 해결
+        // 결과가 1이면 변경, 0이면 에러
+        if (updated == 0) {
+            log.warn("[KakaoPay] approve failed because order not pending orderId={}", orderId);
+            throw new KakaoPayFailException("order not pending");
+        }
+
         // 먼저 카카오페이 에 approve api 를 보내 응답이 제대로 오면 우리 서버의 결제를 승인시킨다.
         try {
             HttpEntity<KakaoApproveResponse> response =
@@ -148,21 +167,31 @@ public class KakaoPayService {
             log.info("[KakaoPay] approve success orderId={}",
                     orders.getId());
 
-            int updated = ordersRepository.updateStatusIfPending(
-                    orderId,
-                    OrderStatus.PAID
-            );
-            // 상태를 atomic 하게 update 해줘서 race condition 해결
-            // 결과가 1이면 변경, 0이면 에러
-            if (updated == 0) {
-                log.warn("[KakaoPay] approve failed because order not pending orderId={}", orderId);
-                throw new KakaoPayFailException("order already processed");
-            }
-
             // 이 주문이 시간 충전 이라면 1000원에 한시간으로 계산
             if(orders.getOrderType() == OrderType.TIME){
                 long addSecond = (orders.getTotalPrice() / 1000) * 60 * 60;
                 orders.getUser().getRemainTime().addRemainTime(addSecond);
+            } else{
+                // 결제 완료 이벤트를 관리자 pc에 보내준다.
+                // payload 로는 결제한 상품들 목록을 보내준다.
+                // outbox에 이벤트 저장.
+
+                List<OrdersProductResponseDto> ordersProductsDto =
+                        orders.getOrdersProducts().stream()
+                                .map(OrdersProductResponseDto::fromEntity)
+                                .toList();
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                String payload = objectMapper.writeValueAsString(ordersProductsDto);
+
+                OutboxEvent outboxEvent =
+                        new OutboxEvent(
+                                OutboxStatus.PENDING,
+                                payload,
+                                LocalDateTime.now()
+                        );
+
+                outboxEventRepository.save(outboxEvent);
             }
 
             return response.getBody();
@@ -171,6 +200,8 @@ public class KakaoPayService {
                     orderId, e);
             orders.changeStatus(OrderStatus.FAILED);
             throw new KakaoPayFailException("kakao pay fail");
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 

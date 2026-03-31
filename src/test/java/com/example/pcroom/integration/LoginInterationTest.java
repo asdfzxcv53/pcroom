@@ -5,7 +5,7 @@ import com.example.pcroom.domain.Role;
 import com.example.pcroom.domain.User;
 import com.example.pcroom.infrastructure.RemainTimeRepository;
 import com.example.pcroom.infrastructure.UserRepository;
-import com.example.pcroom.presentation.LoginRequestDto;
+import com.example.pcroom.presentation.login.LoginRequestDto;
 import com.example.pcroom.presentation.user.UserRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;

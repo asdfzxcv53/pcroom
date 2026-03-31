@@ -1,10 +1,8 @@
-package com.example.pcroom.presentation;
+package com.example.pcroom.presentation.login;
 
 import com.example.pcroom.presentation.user.UserSummary;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter

@@ -1,11 +1,10 @@
 package com.example.pcroom.presentation.controller;
 
 import com.example.pcroom.application.SeatHistoryService;
-import com.example.pcroom.presentation.SeatHistoryResponseDto;
+import com.example.pcroom.presentation.seat.SeatHistoryResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

@@ -1,10 +1,8 @@
 package com.example.pcroom.presentation.controller;
 
 import com.example.pcroom.application.RefreshTokenService;
-import com.example.pcroom.domain.RefreshToken;
-import com.example.pcroom.presentation.RefreshTokenResponse;
+import com.example.pcroom.presentation.login.RefreshTokenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

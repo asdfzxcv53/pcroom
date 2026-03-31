@@ -4,9 +4,9 @@ import com.example.pcroom.domain.*;
 import com.example.pcroom.domain.exception.*;
 import com.example.pcroom.infrastructure.*;
 import com.example.pcroom.infrastructure.security.JwtUtil;
-import com.example.pcroom.presentation.LoginRequestDto;
-import com.example.pcroom.presentation.LoginResult;
-import com.example.pcroom.presentation.ReissueResponse;
+import com.example.pcroom.presentation.login.LoginRequestDto;
+import com.example.pcroom.presentation.login.LoginResult;
+import com.example.pcroom.presentation.login.ReissueResponse;
 import com.example.pcroom.presentation.user.UserSummary;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @Slf4j

@@ -1,4 +1,4 @@
-package com.example.pcroom.presentation;
+package com.example.pcroom.presentation.login;
 
 import lombok.Getter;
 import lombok.Setter;

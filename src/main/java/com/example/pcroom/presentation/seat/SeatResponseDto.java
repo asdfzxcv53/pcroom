@@ -1,4 +1,4 @@
-package com.example.pcroom.presentation;
+package com.example.pcroom.presentation.seat;
 
 import com.example.pcroom.domain.Seat;
 import com.example.pcroom.domain.SeatStatus;
