@@ -5,6 +5,7 @@ import com.example.pcroom.domain.exception.*;
 import com.example.pcroom.infrastructure.KakaoTidRepository;
 import com.example.pcroom.infrastructure.OrdersRepository;
 import com.example.pcroom.infrastructure.OutboxEventRepository;
+import com.example.pcroom.infrastructure.kakao.KakaoPayClient;
 import com.example.pcroom.presentation.kakao.*;
 import com.example.pcroom.presentation.orders.OrdersCancelResponse;
 import com.example.pcroom.presentation.orders.OrdersProductResponseDto;
@@ -39,21 +40,18 @@ public class KakaoPayService {
     private final KakaoPayProperties kakaoPayProperties;
     private final OrdersRepository ordersRepository;
     private final OutboxEventRepository outboxEventRepository;
-    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-    private static final String READY_URL = "https://open-api.kakaopay.com/online/v1/payment/ready";
-    private static final String APPROVE_URL = "https://open-api.kakaopay.com/online/v1/payment/approve";
-    private static final String CANCEL_URL = "https://open-api.kakaopay.com/online/v1/payment/cancel";
+    private final KakaoPayClient kakaoPayClient;
 
     @Autowired
-    public KakaoPayService(KakaoPayStateService kakaoPayStateService, KakaoTidRepository tidRepository, KakaoPayProperties kakaoPayProperties, OrdersRepository ordersRepository, OutboxEventRepository outboxEventRepository, RestTemplate restTemplate, ObjectMapper objectMapper) {
+    public KakaoPayService(KakaoPayStateService kakaoPayStateService, KakaoTidRepository tidRepository, KakaoPayProperties kakaoPayProperties, OrdersRepository ordersRepository, OutboxEventRepository outboxEventRepository, KakaoPayClient kakaoPayClient, ObjectMapper objectMapper) {
         this.kakaoPayStateService = kakaoPayStateService;
         this.tidRepository = tidRepository;
         this.kakaoPayProperties = kakaoPayProperties;
         this.ordersRepository = ordersRepository;
         this.outboxEventRepository = outboxEventRepository;
-        this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
+        this.kakaoPayClient = kakaoPayClient;
     }
 
     // 실제 대기상태인 주문을 만든 후에 카카오페이에 ready api 를 보낸다.
@@ -68,8 +66,6 @@ public class KakaoPayService {
                     return new OrdersNotFoundException("orders not found");
                 });
 
-        HttpHeaders headers = getHeaders();
-
         KakaoReadyRequest kakaoReadyRequest = KakaoReadyRequest.builder()
                 .cid(kakaoPayProperties.getCid())
                 .partner_order_id("" + orders.getId())
@@ -83,28 +79,21 @@ public class KakaoPayService {
                 .fail_url("http://localhost:8080/pay/fail?orderId=" + orders.getId())
                 .build();
 
-        HttpEntity<KakaoReadyRequest> entity =
-                new HttpEntity<>(kakaoReadyRequest, headers);
         try {
-            HttpEntity<KakaoReadyResponse> response =
-                    restTemplate.postForEntity(
-                            READY_URL,
-                            entity,
-                            KakaoReadyResponse.class
-                    );
+            KakaoReadyResponse response = kakaoPayClient.ready(kakaoReadyRequest);
 
-            if(response.getBody() == null) {
+            if(response == null) {
                 log.warn("[KakaoPay] ready response null orderId={}",
                         orders.getId());
                 throw new KakaoPayReadyException("kakao pay ready response null");
             }
-            KakaoTid kakaoTid = new KakaoTid(response.getBody().getTid(), orders, orders.getUser().getId());
+            KakaoTid kakaoTid = new KakaoTid(response.getTid(), orders, orders.getUser().getId());
 
             tidRepository.save(kakaoTid);
 
             log.info("[KakaoPay] ready success orderId={}", orders.getId());
 
-            return response.getBody();
+            return response;
 
         } catch (RestClientException e) {
             log.warn("[KakaoPay] ready response fail ordersId = {}",
@@ -137,8 +126,6 @@ public class KakaoPayService {
 
         String tid = kakaoTid.getTid();
 
-        HttpHeaders headers = getHeaders();
-
         KakaoApproveRequest kakaoApproveRequest = KakaoApproveRequest.builder()
                 .cid(kakaoPayProperties.getCid())
                 .tid(tid)
@@ -147,17 +134,9 @@ public class KakaoPayService {
                 .pg_token(pg_token)
                 .build();
 
-        HttpEntity<KakaoApproveRequest> entity =
-                new HttpEntity<>(kakaoApproveRequest, headers);
-
         // 먼저 카카오페이 에 approve api 를 보내 응답이 제대로 오면 우리 서버의 결제를 승인시킨다.
         try {
-            HttpEntity<KakaoApproveResponse> response =
-                    restTemplate.postForEntity(
-                            APPROVE_URL,
-                            entity,
-                            KakaoApproveResponse.class
-                    );
+            KakaoApproveResponse response = kakaoPayClient.approve(kakaoApproveRequest);
 
             log.info("[KakaoPay] approve success orderId={}",
                     orders.getId());
@@ -189,7 +168,7 @@ public class KakaoPayService {
                 outboxEventRepository.save(outboxEvent);
             }
 
-            return response.getBody();
+            return response;
         } catch (RestClientException e) {
             log.error("[KakaoPay] approve fail orderId={}",
                     orderId, e);
@@ -205,7 +184,7 @@ public class KakaoPayService {
         log.info("[KakaoPay] cancel before pay start ordersId = {}",
                 orderId);
 
-        Orders orders = ordersRepository.findById(orderId)
+       ordersRepository.findById(orderId)
                 .orElseThrow(() -> {
                     log.warn("[KakaoPay] cancel before pay orders not found ordersId = {}",
                             orderId);
@@ -248,19 +227,8 @@ public class KakaoPayService {
                 0
         );
 
-        HttpHeaders headers = getHeaders();
-
-        HttpEntity<KakaoCancelRequest> entity =
-                new HttpEntity<>(kakaoCancelRequest, headers);
-
         try {
-
-            HttpEntity<KakaoCancelResponse> response =
-                    restTemplate.postForEntity(
-                            CANCEL_URL,
-                            entity,
-                            KakaoCancelResponse.class
-                    );
+            KakaoCancelResponse response = kakaoPayClient.cancel(kakaoCancelRequest);
 
             log.info("[KakaoPay] cancel after pay success orderId={}", orders.getId());
 
@@ -320,14 +288,6 @@ public class KakaoPayService {
         orders.changeStatus(OrderStatus.FAILED);
         log.info("[KakaoPay] fail success ordersId = {}",
                 orderId);
-    }
-
-    private HttpHeaders getHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "SECRET_KEY " + kakaoPayProperties.getSecretKey());
-
-        return headers;
     }
 }
 
