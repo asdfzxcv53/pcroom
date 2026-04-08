@@ -31,6 +31,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String phoneNumber;
 
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
+
     @Column(nullable = false)
     private Role role;
 
@@ -51,6 +54,7 @@ public class User implements UserDetails {
         this.password = password;
         this.name = name;
         this.phoneNumber = phoneNumber;
+        this.status = UserStatus.INACTIVE;
         this.role = role;
     }
 
@@ -90,4 +94,6 @@ public class User implements UserDetails {
     public void setRemainTime(RemainTime remainTime) {
         this.remainTime = remainTime;
     }
+
+    public void setStatus(UserStatus status) {this.status = status;}
 }

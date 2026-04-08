@@ -34,15 +34,17 @@ public class AuthService {
     private final RemainTimeRepository remainTimeRepository;
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final LogoutService logoutService;
     private final JwtUtil jwtUtil;
 
     @Autowired
-    public AuthService(UserRepository userRepository, SeatRepository seatRepository, RemainTimeRepository remainTimeRepository, AuthenticationManager authenticationManager, RefreshTokenRepository refreshTokenRepository , JwtUtil jwtUtil) {
+    public AuthService(UserRepository userRepository, SeatRepository seatRepository, RemainTimeRepository remainTimeRepository, AuthenticationManager authenticationManager, RefreshTokenRepository refreshTokenRepository, LogoutService logoutService, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.seatRepository = seatRepository;
         this.remainTimeRepository = remainTimeRepository;
         this.authenticationManager = authenticationManager;
         this.refreshTokenRepository = refreshTokenRepository;
+        this.logoutService = logoutService;
         this.jwtUtil = jwtUtil;
     }
 
@@ -87,6 +89,18 @@ public class AuthService {
                     return new UsernameNotFoundException("username not found");
                 });
 
+        RemainTime remainTime = remainTimeRepository.findRemainTime(loginUser.getId())
+                .orElseThrow(() -> {
+                    log.warn("[Login] remain time entity not made userId={}",
+                            loginUser.getId());
+                    return new RemainTimeNotFoundException("remain time entity not found");
+                });
+
+        // 사용자가 다른좌석에서 사용중이라면 로그아웃부터 진행
+        if(loginUser.getStatus() == UserStatus.ACTIVE){
+            logoutService.logout(loginUser, remainTime);
+        }
+
         refreshTokenRepository.deleteByUserId(loginUser.getId());
         // 존재하던 refreshToken 삭제 해주거나, 아니면 db에 로그기록으로 남기거나 선택
 
@@ -95,15 +109,10 @@ public class AuthService {
         // refreshtoken db 에 저장
 
         Seat seat = seatRepository.findBySeatNumber(loginRequestDto.getSeatNumber())
-                .orElseThrow(new SeatNotFoundException("유효하지 않은 좌석번호 입니다."));
+                .orElseThrow(() -> new SeatNotFoundException("유효하지 않은 좌석번호 입니다."));
+
 
         LocalDateTime endTime;
-        RemainTime remainTime = remainTimeRepository.findRemainTime(loginUser.getId())
-                .orElseThrow(() -> {
-                    log.warn("[Login] remain time entity not made userId={}",
-                            loginUser.getId());
-                    return new RemainTimeNotFoundException("remain time entity not found");
-                });
 
         if(remainTime.getRemainTime() == 0) {
             // 남은시간이 없는경우
@@ -119,12 +128,15 @@ public class AuthService {
                     loginUser.getId());
         }
 
+
         SeatHistory seatHistory = new SeatHistory(seat, loginUser, LocalDateTime.now(), null);
 
         seat.addSeatHistory(seatHistory);
         seat.setSeatStatus(SeatStatus.USING);
         // transaction 이 끝나면 자동으로 영속성컨텍스트의 seat 이 변경감지를 통해 update 되고
         // Cascade.ALL 의 설정으로 seatHistory 역시 자동으로 데이터베이스에 저장이 된다.
+
+        loginUser.setStatus(UserStatus.ACTIVE);
 
         UserSummary userSummary = new UserSummary(loginUser.getId(), loginUser.getName(), loginUser.getRole(), endTime);
 
