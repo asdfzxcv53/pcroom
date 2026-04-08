@@ -1,7 +1,6 @@
 package com.example.pcroom.domain.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -13,7 +12,7 @@ public class GlobalExceptionHandler {
 
     // 계정 생성 단계에서 중복이 경우
     @ExceptionHandler(DuplicateAccountException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.CONFLICT) // 409 충돌
     public Map<String, String> handleDuplicateAccountException(DuplicateAccountException e) {
         return Map.of("error", e.getMessage());
     }
@@ -55,15 +54,29 @@ public class GlobalExceptionHandler {
 
     // Remaintime entity 가 없을때
     @ExceptionHandler(RemainTimeNotFoundException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleRemainTimeNotFoundException(RemainTimeNotFoundException e) {
         return Map.of("error", e.getMessage());
     }
 
     // User entity 가 없을때
     @ExceptionHandler(UserNotFoundException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleUserNotFoundException(UserNotFoundException e) {
+        return Map.of("error", e.getMessage());
+    }
+
+    // seat 이 empty 상태가 아닌경우
+    @ExceptionHandler(SeatIsNotEmptyException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, String> handleSeatIsNotEmptyException(SeatIsNotEmptyException e) {
+        return Map.of("error", e.getMessage());
+    }
+
+    // seat entity 가 없을때
+    @ExceptionHandler(SeatNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleSeatNotFoundException(SeatNotFoundException e) {
         return Map.of("error", e.getMessage());
     }
 }

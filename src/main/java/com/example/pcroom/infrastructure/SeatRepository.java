@@ -5,7 +5,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class SeatRepository {
@@ -24,10 +26,12 @@ public class SeatRepository {
                 .getResultList();
     }
 
-    public Seat findBySeatNumber(int seatNumber) {
-        return em.createQuery("select s from Seat s where s.seatNumber = :seatNumber", Seat.class)
+    public Optional<Seat> findBySeatNumber(int seatNumber) {
+        List<Seat> seats = em.createQuery("select s from Seat s where s.seatNumber = :seatNumber", Seat.class)
                 .setParameter("seatNumber", seatNumber)
-                .getSingleResult();
+                .getResultList();
+
+        return seats.stream().findFirst();
     }
 
 

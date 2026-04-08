@@ -50,6 +50,9 @@ public class AuthService {
         log.info("[Login] request username = {}",
                 loginRequestDto.getUsername());
 
+        // 이 좌석이 사용 가능한지 체크
+        checkSeatEmpty(loginRequestDto.getSeatNumber());
+
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
@@ -91,7 +94,8 @@ public class AuthService {
         refreshTokenRepository.save(newRefreshToken);
         // refreshtoken db 에 저장
 
-        Seat seat = seatRepository.findBySeatNumber(loginRequestDto.getSeatNumber());
+        Seat seat = seatRepository.findBySeatNumber(loginRequestDto.getSeatNumber())
+                .orElseThrow(new SeatNotFoundException("유효하지 않은 좌석번호 입니다."));
 
         LocalDateTime endTime;
         RemainTime remainTime = remainTimeRepository.findRemainTime(loginUser.getId())
@@ -199,6 +203,15 @@ public class AuthService {
 
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 algorithm not found", e);
+        }
+    }
+
+    private void checkSeatEmpty(Integer seatNumber) {
+        Seat seat = seatRepository.findBySeatNumber(seatNumber)
+                .orElseThrow(() -> new SeatNotFoundException("유효하지 않은 좌석번호 입니다."));
+
+        if(seat.getSeatStatus() != SeatStatus.EMPTY){
+            throw new SeatIsNotEmptyException("사용할수 없는 좌석입니다.");
         }
     }
 }
