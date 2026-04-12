@@ -9,6 +9,10 @@ import java.util.List;
 
 @Getter
 @Entity
+@Table(indexes = {
+        @Index(name = "idx_orders_user", columnList = "USER_ID"),
+        @Index(name = "idx_orders_status", columnList = "status")
+})
 public class Orders {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

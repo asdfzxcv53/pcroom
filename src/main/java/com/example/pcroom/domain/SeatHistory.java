@@ -7,6 +7,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Table(indexes = {
+        @Index(name = "idx_user_endtime", columnList = "USER_ID, endTime")
+})
 public class SeatHistory {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
