@@ -2,6 +2,7 @@ package com.example.pcroom.application;
 
 import com.example.pcroom.domain.OrderStatus;
 import com.example.pcroom.domain.exception.KakaoPayCantCancelException;
+import com.example.pcroom.domain.exception.KakaoPayCantFailException;
 import com.example.pcroom.domain.exception.KakaoPayFailException;
 import com.example.pcroom.infrastructure.OrdersRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ public class KakaoPayStateService {
         this.ordersRepository = ordersRepository;
     }
 
-    @Transactional(propagation = REQUIRES_NEW)
+    @Transactional
     public void markApproving(Long orderId) {
         // PENDING 상태 확인
         int updated = ordersRepository.updateStatusIfPending(
@@ -36,7 +37,7 @@ public class KakaoPayStateService {
     }
 
     @Transactional
-    public void markCancel(Long orderId) {
+    public void markCancelBeforePay(Long orderId) {
         // PENDING 상태 확인
         int updated = ordersRepository.updateStatusIfPending(
                 orderId,
@@ -47,6 +48,35 @@ public class KakaoPayStateService {
         if (updated == 0) {
             log.warn("[KakaoPay] cancel failed because order not pending ordersId = {}", orderId);
             throw new KakaoPayCantCancelException("order already processed");
+        }
+    }
+
+    @Transactional
+    public void markCancelAfterPay(Long orderId) {
+        // PENDING 상태 확인
+        int updated = ordersRepository.updateStatusIfPaid(
+                orderId,
+                OrderStatus.CANCELED
+        );
+
+        // 여기도 마찬가지로 atomic 하게 update 해준다.
+        if (updated == 0) {
+            log.warn("[KakaoPay] cancel failed because order not paid ordersId = {}", orderId);
+            throw new KakaoPayCantCancelException("order is not processed");
+        }
+    }
+
+    @Transactional
+    public void markFail(Long orderId) {
+        // PAID 상태 확인
+        int updated = ordersRepository.updateStatusIfPaid(
+                orderId,
+                OrderStatus.PAID
+        );
+
+        if(updated == 0) {
+            log.warn("[KakaoPay] fail failed because order not paid ordersId = {}", orderId);
+            throw new KakaoPayCantFailException("order is not paid");
         }
     }
 }
