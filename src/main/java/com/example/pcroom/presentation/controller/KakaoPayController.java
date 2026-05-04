@@ -1,13 +1,9 @@
 package com.example.pcroom.presentation.controller;
 
 import com.example.pcroom.application.KakaoPayService;
-import com.example.pcroom.application.OrdersService;
-import com.example.pcroom.domain.Orders;
 import com.example.pcroom.presentation.kakao.KakaoApproveResponse;
 import com.example.pcroom.presentation.kakao.KakaoReadyResponse;
 import com.example.pcroom.presentation.orders.OrdersCancelResponse;
-import com.example.pcroom.presentation.orders.OrdersRequestDto;
-import com.example.pcroom.presentation.orders.OrdersResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,18 +13,15 @@ import org.springframework.web.bind.annotation.*;
 public class KakaoPayController {
 
     private final KakaoPayService kakaoPayService;
-    private final OrdersService ordersService;
 
     @Autowired
-    KakaoPayController(KakaoPayService kakaoPayService, OrdersService ordersService) {
+    KakaoPayController(KakaoPayService kakaoPayService) {
         this.kakaoPayService = kakaoPayService;
-        this.ordersService = ordersService;
     }
 
     @PostMapping("/ready")
-    public ResponseEntity<KakaoReadyResponse> readyPay(@RequestBody OrdersRequestDto ordersRequestDto) {
-        OrdersResponseDto ordersResponseDto = ordersService.createOrder(ordersRequestDto);
-        KakaoReadyResponse response = kakaoPayService.ready(ordersResponseDto);
+    public ResponseEntity<KakaoReadyResponse> readyPay(@RequestParam Long orderId) {
+        KakaoReadyResponse response = kakaoPayService.ready(orderId);
 
         return ResponseEntity.ok(response);
     }
