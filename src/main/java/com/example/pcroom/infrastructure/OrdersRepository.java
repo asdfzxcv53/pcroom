@@ -46,6 +46,19 @@ public class OrdersRepository {
                 .executeUpdate();
     }
 
+    public int updateStatusIfPaid(Long orderId, OrderStatus status) {
+        return em.createQuery(
+                "update Orders o " +
+                   "set o.status = :status " +
+                   "where o.id = :orderId " +
+                   "and o.status = :paid"
+        )
+                .setParameter("status", status)
+                .setParameter("orderId", orderId)
+                .setParameter("paid", OrderStatus.PAID)
+                .executeUpdate();
+    }
+
     public List<Orders> findApprovingOrdersWithTid(OrderStatus status) {
         return em.createQuery(
                     "select o from Orders o " +
