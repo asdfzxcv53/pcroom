@@ -42,6 +42,9 @@ dependencies {
 	// Redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+	// H2
+	testRuntimeOnly 'com.h2database:h2'
+
 	// Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
